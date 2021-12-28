@@ -1,7 +1,5 @@
 node_modules/
-reports/
-allure-report/
-allure-results/
+result/
 .vscode/*
 debug.log
 *.js
@@ -10,5 +8,6 @@ debug.log
 .vscode/launch.json
 .history/
 *package-lock.json
+*cake.txt
 #ignore everything above except below files:
 !.gitignore
