@@ -1,0 +1,14 @@
+node_modules/
+reports/
+allure-report/
+allure-results/
+.vscode/*
+debug.log
+*.js
+*.js.map
+*.code-workspace
+.vscode/launch.json
+.history/
+*package-lock.json
+#ignore everything above except below files:
+!.gitignore
