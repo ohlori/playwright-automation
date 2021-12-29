@@ -1,6 +1,8 @@
+import * as fs from "fs";
+import { checkPrimeSync } from "crypto";
 import { join } from "path";
 const normalizer = require("path");
-var fs = require("fs");
+
 
 export class Base {
     public contentPath: string;
@@ -11,11 +13,7 @@ export class Base {
         return this.contentData;
     }
 
-    /**
-     * Loads the content file by parsing the json file from the given @param {string} path.
-     * @todo make the json reading async if the json files gets huge.
-     */
-    public loadContent(path: string) {
+    public loadContent(path: string, testData?: string) {
         try {
             const localPath = join(process.cwd(), path);
             this.contentPath = normalizer.normalize(localPath);
@@ -24,6 +22,17 @@ export class Base {
         } catch (error) {
             console.log("ERROR: unable to read content file.");
         }
+    }
+
+     public loadJSONData(path: string, testData: string) {
+        let jsonPath;
+
+        this.contentPath = join(process.cwd(), path);
+        this.contentPath = normalizer.normalize(this.contentPath);
+        this.contentPath = JSON.parse(fs.readFileSync(this.contentPath, "utf8"));
+        // populate a path with the whole json file
+        jsonPath = this.contentPath;
+        return jsonPath[testData];
     }
 
      public locateJSON(data: JSON, jsonStrc: string) {
@@ -38,15 +47,18 @@ export class Base {
             }
             return JSON.parse(JSON.stringify(loc,undefined,2));
         } else {
-            return loc[jsonStrc];
+            return loc;
         }
     }
 
-    public async getJSONData(path: string, block?: string): Promise <any> {
-        let data = await this.loadContent(path);
-        data = block === undefined ? data: this.locateJSON(data, block) ;
-        return data;
+    public async getJSONData(path: string, block?: string) {
+        let data;
+        this.contentData = await this.loadContent(path);
+        this.contentData = block === undefined ? this.contentData: this.contentData[block];
+        data = this.contentData;
+        return  data;
     }
+    
 
     public async processOrderBody(infos: any): Promise <any> {    
         let viewData = { 
@@ -58,5 +70,14 @@ export class Base {
         });
 
         return await viewData;
+    }
+
+    public loopJsonData(json, data, callback) {
+        const inputData = this.loadJSONData(json, data);
+        inputData.forEach((val, i) => {
+            ((item, index) => {
+                callback(item, index, inputData);
+            })(val, i);
+        });
     }
 }

@@ -1,36 +1,55 @@
 import { Base } from '../util/base';
 import test from '@playwright/test';
 import { json } from 'stream/consumers';
+import { join } from 'path';
 var fs = require("fs");
 
 const base = new Base();
 
 
 test("Get SHIPPPING status", async ({ request, baseURL }) => {
-    const res_ = await request.get(baseURL + "/api/v3/order/get_order_id_list?source=shipping&page_size=40&page_number=1");
-    let infos = await JSON.parse(JSON.stringify(await res_.json()));
-    infos = await infos.data.orders.map((x) => ({"order_id": x.order_id, "shop_id": x.shop_id,  "region_id": x.region_id }));
-    // console.log(await infos);
-    //console.log(await typeof infos);
- 
-    let viewData = { 
-        orders : [] 
-    };
-    let jsonData = {};
+    let count = 1;
+    let pages;
+    let infos;
+    let orders;
+    let combinedResponses;
+    do {
+        const res_ = await request.get(baseURL + "/api/v3/order/get_order_id_list?source=shipping&page_number=" + count);
+        infos = await JSON.parse(JSON.stringify(await res_.json()));
+        orders = await infos.data.orders.map((x) => ({"order_id":  x.order_id }));
+        orders = await JSON.stringify(await orders,undefined,2);
+        if (count === 1) {
+            const info = await base.locateJSON(infos, "data.page_info.total");
+            pages = info/40;
+            pages = (pages % 1) !== 0 ? Math.trunc(pages)+1 : Math.trunc(pages); 
+            combinedResponses = (await orders);
+        } else {
+            combinedResponses = (await combinedResponses + await orders).replace("\n][",",");
+        }
+        ++count;
+        //console.log(combinedResponses);
+    } while (count <= pages);
 
-    await infos.forEach (async function(column) {
-        await viewData.orders.push(await column);
-    });
+    //console.log(combinedResponses);
+    const data = await base.processOrderBody(JSON.parse(combinedResponses));
+    await fs.writeFile ("./result/shipping-order-ids.json", await JSON.stringify(await data,undefined,2), async function(err) {
+        if (err) { throw err }
+            console.log("complete");
 
-    // console.log(await viewData);
-    console.log("TO SHIP TOTAL ORDERS: " + await viewData.orders.length);
-    const resDetails = await request.post(baseURL + "/api/v3/order/get_shipment_order_list_by_order_ids_multi_shop", {
-        data: viewData
-    });  
-
-    await fs.writeFile ("./result/shipping-status.json", JSON.stringify(await resDetails.json(),undefined,2), function(err) {
-        if (err) throw err;
-            console.log('complete');
+            await base.loopJsonData("/result/shipping-order-ids.json", "orders", async function(item) {
+                // console.log(item.order_id);
+                const getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + await item.order_id);
+                console.log("x");
+                console.log("y");
+                // let stat = await JSON.parse(JSON.stringify(await getShippingStatus.json()));
+                // stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "courier" : x.thirdparty_tracking_number, "status": x.status, "status2" : x.channel_status}));
+                // // // stat = await JSON.stringify(await stat,undefined,2);
+                // console.log(await JSON.stringify(await stat,undefined,2));
+                // combinedResponses = (await combinedResponses + await stat).replace("\n][",",");
+            });
         }
     );
+
+  
+    
 })

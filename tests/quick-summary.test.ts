@@ -7,6 +7,9 @@ var fs = require("fs");
 const base = new Base();
 
 test("Quick Summary", async ({ request, baseURL }) => {
+    const msg = await request.get(baseURL + "/webchat/api/v1.2/mini/conversation/unread-count");
+    const msgData =  await base.locateJSON(await msg.json(), "total_unread_count");
+
     const res_ = await request.post(baseURL + "/api/v3/order/get_shipment_meta_multi_shop", {
         data: {
             "orders": [{"shop_id": 271248938,"region_id": "PH"}]
@@ -23,7 +26,7 @@ test("Quick Summary", async ({ request, baseURL }) => {
     await fs.writeFile ("./result/quick-summary.json", combinedResponses, async function(err) {
         if (err) throw err;
 
-        const info = await base.getJSONData("/result/quick-summary.json",);
+        const info = await base.getJSONData("/result/quick-summary.json");
         console.log("-------------------------------------------");
         console.log("|              QUICK SUMMARY              |");
         console.log("-------------------------------------------");
@@ -35,6 +38,7 @@ test("Quick Summary", async ({ request, baseURL }) => {
         console.log("\n\tTOTAL IN SHIPPING: " + info.data.shipping);
         console.log("\t ► In Transit: " + info.in_transit);
         console.log("\t ► Delivered: " + (info.data.shipping - info.in_transit));
+        console.log("\n\tUNREAD MESSAGE/S: " + msgData.total_unread_count);
         console.log("-------------------------------------------");
     });
 })
