@@ -13,7 +13,7 @@ export class Base {
         return this.contentData;
     }
 
-    public loadContent(path: string, testData?: string) {
+    public loadContent(path: string) {
         try {
             const localPath = join(process.cwd(), path);
             this.contentPath = normalizer.normalize(localPath);
