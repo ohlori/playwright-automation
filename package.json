@@ -1,9 +1,10 @@
 {
   "scripts": {
+    "pretest": "tsc --incremental -p ./tsconfig.json",
     "all": "npx playwright test",
     "daily" : "npx playwright test tests/get-shipping-ids.test.ts",
     "summary" : "npx playwright test tests/quick-summary.test.ts",
-    "shipping" : "npx playwright test tests/shipping-status.test.ts",
+    "shipping" : "npm run pretest && npx playwright test tests/shipping-status.test.ts",
     "to-ship" : "npx playwright test tests/get-data.test.ts"
   },
   "devDependencies": {

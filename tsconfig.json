@@ -1,23 +1,16 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "baseUrl": ".",
-    "module": "commonjs",
-    "paths": { "*": ["types/*"] },
-    "outDir": "./dist/out-tsc",
-    "mapRoot": "./dist/out-tsc/",
-    "sourceMap": true,
-    "declaration": false,
-    "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "lib": [
-      "es2016"
-    ],
-    "allowSyntheticDefaultImports": true,
-    "target": "es6",
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+      "target": "es6",
+      "module": "commonjs",
+      "outDir": "./dist/out-tsc",
+      "mapRoot": "./dist/out-tsc/",
+      "sourceMap": true,
+      "declaration": false,
+      "moduleResolution": "Node",
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "typeRoots": [
+        "node_modules/@types"
+      ]
   }
 }

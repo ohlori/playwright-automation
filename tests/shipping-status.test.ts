@@ -6,7 +6,6 @@ var fs = require("fs");
 
 const base = new Base();
 
-
 test("Get SHIPPPING status", async ({ request, baseURL }) => {
     test.setTimeout(0);
     let count = 0;
@@ -16,12 +15,21 @@ test("Get SHIPPPING status", async ({ request, baseURL }) => {
 
     
     do {
+        const transDetail = await request.get(baseURL + "/api/v3/finance/income_transaction_history_detail/?order_id=" + String(Object.values(await order_ids.orders[count])));
+        let info = await JSON.parse(JSON.stringify(await transDetail.json()));
+        //console.log(typeof info.data.payment_info.fees_and_charges.transaction_fee);
+
         const getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + String(Object.values(await order_ids.orders[count])));
         let stat = await JSON.parse(JSON.stringify(await getShippingStatus.json()));
-        stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "courier" : x.thirdparty_tracking_number, "status": x.status, "status2" : x.channel_status}));
-        stat = await JSON.stringify(await stat,undefined,2);
+        stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "courier" : x.thirdparty_tracking_number, "status": x.status, "status2" : x.channel_status,
+                            "subtotal" : info.data.payment_info.merchant_subtotal.product_price,
+                            "shipping_fee": info.data.buyer_payment_info.shipping_fee,
+                            "charges": Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee),
+                            "refund" : info.data.payment_info.merchant_subtotal.refund_amount}));
+
+        stat = await JSON.stringify(await stat ,undefined,2);
         combinedResponses = (await combinedResponses + await stat).replace("\n][",",");
-        //console.log(combinedResponses);
+        // console.log(await combinedResponses);
         ++count;
     } while (count < total_order_ids);
 
@@ -43,15 +51,16 @@ test.only("Shipping Status Summary", async ({ request, baseURL }) => {
     console.log("-------------------------------------------");
     console.log("|       SUMMARY OF SHIPPING STATUS        |");
     console.log("-------------------------------------------");
-    console.log("\x1b[31m%s\x1b[0m","\tRETURN TO SELLER (RTS): " + rts_total + " | ");
-    
+    console.log("\x1b[31m%s\x1b[0m","\tRETURN TO SELLER (RTS): " + rts_total);
+    // console.log(" ► Unreleased: " + info.data.toship_unprocessed);
+
     console.log("\n\tDELIVERED: " + delivered);
     // console.log(" ► Unreleased: " + info.data.toship_unprocessed);
     console.log("\tIN-PROGRESS: " + shipping);
     // console.log("\t ► To Collect: " + info.in_transit);
-    console.log("\x1b[33m%s\x1b[0m","-------------------------------------------");
+    console.log("\n-------------------------------------------");
     console.log("\x1b[33m%s\x1b[0m","\tUNCATEGORIZED STATUS CODE: " + (Object.values(info).length-(rts_total+delivered+shipping)));
-    console.log("\x1b[33m%s\x1b[0m","-------------------------------------------");
+    console.log("-------------------------------------------");
 
     
 })
