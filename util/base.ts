@@ -30,25 +30,23 @@ export class Base {
         this.contentPath = join(process.cwd(), path);
         this.contentPath = normalizer.normalize(this.contentPath);
         this.contentPath = JSON.parse(fs.readFileSync(this.contentPath, "utf8"));
-        // populate a path with the whole json file
         jsonPath = this.contentPath;
         return jsonPath[testData];
     }
 
-     public locateJSON(data: JSON, jsonStrc: string) {
+     public locateJSON(data: JSON, jsonStrc?: string) {
         let loc: JSON = data;
         // split the received locator path in json with .
         let str;
-        if (jsonStrc.includes(".")) {
+        if (jsonStrc !== undefined && jsonStrc.includes(".")) {
             str = jsonStrc.split(".");
 
             for (let i = 0; i < str.length; i++) {
                 loc = loc[str[i]];
             }
-            return JSON.parse(JSON.stringify(loc,undefined,2));
-        } else {
-            return loc;
+            
         }
+        return JSON.parse(JSON.stringify(loc,undefined,2));
     }
 
     public async getJSONData(path: string, block?: string) {

@@ -14,8 +14,11 @@ const config = {
     //browserName: 'webkit',
 
     baseURL: "https://seller.shopee.ph",
+    // Cake: Cookies from your session
+    // Authorization: Bearer token
     extraHTTPHeaders: {
-      "cookie": cake
+      "cookie": cake,
+      "authorization": ""
     },
     actionTimeout:10000,
     screenshot: 'only-on-failure',
