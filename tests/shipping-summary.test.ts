@@ -21,8 +21,7 @@ test("Shipping Status Summary", async ({ request, baseURL }) => {
     console.log("-------------------------------------------");
     console.log("|       SUMMARY OF SHIPPING STATUS        |");
     console.log("-------------------------------------------");
-    console.log("\x1b[31m%s\x1b[0m","\tRETURN TO SELLER (RTS): " + rts_total_count);
-    console.log("\x1b[31m%s\x1b[0m","\t ► Lost: ₱" + String(Number(rts_total).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));;
+    console.log("\x1b[31m%s\x1b[0m","\t      RTS: " + rts_total_count + " | ₱" +  String(Number(await rts_total).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));;
 
     console.log("\n-------------------------------------------");
     console.log("\x1b[32m%s\x1b[0m","\tTO COLLECT TOTAL: ₱" + String(Number(Number(delivered_total) + Number(shipping_total)).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
