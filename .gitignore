@@ -1,5 +1,6 @@
 node_modules/
 result/
+dist/
 .vscode/*
 debug.log
 *.js
