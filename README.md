@@ -1,1 +1,1 @@
-# Personal project to learn api autoamtion
+# Personal project to learn api automation
