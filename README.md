@@ -1,0 +1,3 @@
+# playwright-automation
+
+PERSONAL PROJECT TO LEARN API AUTOMATION
