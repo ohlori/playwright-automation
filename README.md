@@ -1,3 +1,1 @@
-# playwright-automation
-
-PERSONAL PROJECT TO LEARN API AUTOMATION
+# Personal project to learn api autoamtion
