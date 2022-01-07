@@ -23,15 +23,12 @@ export class Base {
             console.log("ERROR: unable to read content file.");
         }
     }
-
-     public loadJSONData(path: string, testData: string) {
-        let jsonPath;
-
-        this.contentPath = join(process.cwd(), path);
-        this.contentPath = normalizer.normalize(this.contentPath);
-        this.contentPath = JSON.parse(fs.readFileSync(this.contentPath, "utf8"));
-        jsonPath = this.contentPath;
-        return jsonPath[testData];
+    public async getJSONData(path: string, block?: string) {
+        let data;
+        this.contentData = await this.loadContent(path);
+        this.contentData = block === undefined ? this.contentData: this.contentData[block];
+        data = this.contentData;
+        return  data;
     }
 
      public locateJSON(data: JSON, jsonStrc?: string) {
@@ -44,18 +41,10 @@ export class Base {
             for (let i = 0; i < str.length; i++) {
                 loc = loc[str[i]];
             }
-            
         }
         return JSON.parse(JSON.stringify(loc,undefined,2));
     }
 
-    public async getJSONData(path: string, block?: string) {
-        let data;
-        this.contentData = await this.loadContent(path);
-        this.contentData = block === undefined ? this.contentData: this.contentData[block];
-        data = this.contentData;
-        return  data;
-    }
     
 
     public async processOrderBody(infos: any): Promise <any> {    
@@ -70,12 +59,14 @@ export class Base {
         return await viewData;
     }
 
-    public loopJsonData(json, data, callback) {
+    public async loopJsonData(json, data, callback) {
         const inputData = this.loadJSONData(json, data);
-        inputData.forEach((val, i) => {
-            ((item, index) => {
-                callback(item, index, inputData);
-            })(val, i);
+        const promises = [];
+        await inputData.forEach((val, i) => {
+            promises.push(callback(val, i, inputData));
         });
+        await Promise.all(promises);
     }
+
+    loadJSONData
 }
