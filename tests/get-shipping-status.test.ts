@@ -1,11 +1,8 @@
 import { Base } from '../util/base';
 import test from '@playwright/test';
-import { json } from 'stream/consumers';
-import { join } from 'path';
-var fs = require("fs");
+var fs = require("fs/promises");
 
 const base = new Base();
-
 
 test("Get SHIPPING ORDER ID info", async ({ request, baseURL }) => {
     let count = 1;
@@ -53,30 +50,22 @@ test("Get SHIPPPING status", async ({ request, baseURL }) => {
 
     for (let x = 0; x < total_order_ids; x++) {
         const current_val = Number(Object.values(await order_ids.orders[x]));
-        const found = await orders.orders.filter(x => x.order_id === current_val)[0];
-        //console.log(found);
-        if (await found === undefined) {
-            const transDetail = await request.get(baseURL + "/api/v3/finance/income_transaction_history_detail/?order_id=" + String(current_val));
-            let info = await JSON.parse(JSON.stringify(await transDetail.json()));
-            //console.log(typeof info.data.payment_info.fees_and_charges.transaction_fee);
+        const transDetail = await request.get(baseURL + "/api/v3/finance/income_transaction_history_detail/?order_id=" + String(current_val));
+        let info = await JSON.parse(JSON.stringify(await transDetail.json()));
+        //console.log(typeof info.data.payment_info.fees_and_charges.transaction_fee);
 
-            const getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + String(current_val));
-            let stat = await JSON.parse(JSON.stringify(await getShippingStatus.json()));
-            stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "courier" : x.thirdparty_tracking_number, "status": x.status, "status2" : x.channel_status,
-                                "subtotal" : info.data.payment_info.merchant_subtotal.product_price,
-                                "shipping_fee": info.data.buyer_payment_info.shipping_fee,
-                                "charges": Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee),
-                                "refund" : info.data.payment_info.merchant_subtotal.refund_amount,
-                                "net" : info.data.payment_info.merchant_subtotal.product_price - 
-                                        (Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee))}));
+        const getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + String(current_val));
+        let stat = await JSON.parse(JSON.stringify(await getShippingStatus.json()));
+        stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "courier" : x.thirdparty_tracking_number, "status": x.status, "status2" : x.channel_status,
+                            "subtotal" : info.data.payment_info.merchant_subtotal.product_price,
+                            "shipping_fee": info.data.buyer_payment_info.shipping_fee,
+                            "charges": Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee),
+                            "refund" : info.data.payment_info.merchant_subtotal.refund_amount,
+                            "net" : info.data.payment_info.merchant_subtotal.product_price - 
+                                    (Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee))}));
 
-            stat = await JSON.stringify(await stat[0], undefined,2);
-            combinedResponses = (await combinedResponses + await stat).replace("\n}{","\n},\n{");
-       } else {
-            //console.log(await orders.orders.filter(x => x.order_id === current_val)[0]);
-            let stat = await JSON.stringify(await orders.orders.filter(x => x.order_id === current_val)[0], undefined,2);
-            combinedResponses = (await combinedResponses + await stat).replace("\n}{","\n},\n{");
-       }
+        stat = await JSON.stringify(await stat[0], undefined,2);
+        combinedResponses = (await combinedResponses + await stat).replace("\n}{","\n},\n{");
     }
 
     //console.log(await combinedResponses);
@@ -104,12 +93,12 @@ test("Shipping Status Summary", async () => {
     console.log("-------------------------------------------");
     console.log("\x1b[31m%s\x1b[0m","\t      RTS: " + rts_total_count + " | ₱" +  String(Number(await rts_total).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));;
 
-    console.log("\n-------------------------------------------");
+    console.log("-------------------------------------------");
     console.log("\x1b[32m%s\x1b[0m","\tTO COLLECT TOTAL: ₱" + String(Number(Number(delivered_total) + Number(shipping_total)).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
     console.log("-------------------------------------------");
     console.log("\tDelivered:   " + delivered_count + " | ₱" +  String(Number(delivered_total).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
     console.log("\tIn-Progress: " + shipping_count +" | ₱" + String(Number(shipping_total).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-    console.log("\n-------------------------------------------");
+    console.log("-------------------------------------------");
     console.log("\x1b[33m%s\x1b[0m","\tUNCATEGORIZED STATUS CODE: " + (Object.keys(data.orders).length-(rts_total_count+delivered_count+shipping_count)));
     console.log("-------------------------------------------"); 
 })

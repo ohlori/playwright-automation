@@ -2,7 +2,7 @@ import test from '@playwright/test';
 import { join } from 'path';
 const path = require('path');
 import { Base }  from "../util/base";
-var fs = require("fs");
+var fs = require("fs/promises");
 
 const base = new Base();
 
