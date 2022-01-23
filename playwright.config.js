@@ -14,13 +14,18 @@ const config = {
     //browserName: 'webkit',
 
     baseURL: "https://seller.shopee.ph",
+
+    // Limit the number of workers on CI, use default locally
+    workers: process.env.CI ? 2 : undefined,
+
     // Cake: Cookies from your session
     // Authorization: Bearer token
     extraHTTPHeaders: {
       "cookie": cake,
       "authorization": ""
     },
-    actionTimeout:10000,
+    setTimeout: 600000,
+    globalTimeout: 600000,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
   },
