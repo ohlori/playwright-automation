@@ -1,0 +1,323 @@
+{
+    "7980571205" : {
+        "33914673500" : {
+            "name" : "Generic TS",
+            "cost" : 30.02
+        }
+    },
+    "15245117323" : {
+        "152124382702" : {
+            "name" : "POS Paper",
+            "cost" : 18.64
+        }
+    },
+    "6291020872" : {
+        "name" : "Generic Colored",
+        "142181247155" : {
+            "name" : "colored paper",
+            "cost" : 21.66
+        },
+        "142181247156" : {
+            "name" : "colored sticker",
+            "cost" : 44.22
+        }     
+    },
+    "6950756099" : {
+        "name" : "Paperang Themal Rolls",
+        "22248874339" : {
+            "name": "ThermalRefill(10yrs)",
+            "cost" : 116.84
+        },
+        "22248874340" :{
+            "name": "ThermalSticker(5yrs)",
+            "cost" : 143.09
+        },
+        "93785295484" :{
+            "name": "GenericSticker-OEM",
+            "cost" : 0
+        }
+    },
+    "12712978392" : {
+        "57336652008" : {
+            "name" : "Blue Ink",
+            "cost" : 58.10
+        }
+    },
+    "12612977930" : {
+        "120586658572" : {
+            "name" : "Pink Ink",
+            "cost" : 145.78
+        }
+    },
+    "7755274567" : {
+        "name" : "HD Stickers",
+        "63938471063" : {
+            "name" : "Translucent,1 Roll",
+            "cost" : 75.05
+        },
+        "63938471066" : {
+            "name" : "Transparent-P1 only,1 Roll",
+            "cost" : 75.05
+        }
+    },
+    "3589210800" : {
+        "82088587588" : {
+            "name" : "Generic TS P3",
+            "cost" : 54.29
+        }
+    },
+    "7993742900" : {
+        "66283769907" : {
+            "name" : "Paperang P3 TP",
+            "cost" : 150.04
+        }
+    },
+    "4054867814" :{
+        "90610644504" : {
+            "name" :"Hard Case",
+            "cost" : 47.64
+        }
+    },
+    "8420382283" : {
+        "8420382283" : 1,
+        "name" : "Silicon Case",
+        "80991152777" :{
+            "name": "P1 or P1s,White",
+            "cost" : 36.42
+        },
+        "80991152778" :{
+            "name": "P1 or P1s,Pink",
+            "cost" : 36.42
+        },
+        "80991152779" :{
+            "name": "P1 or P1s,Mint",
+            "cost" : 36.42
+        },
+        "80991152780" :{
+            "name": "P2 or P2s,White",
+            "cost" : 47.89
+        },
+        "80991152781" :{
+            "name": "P2 or P2s,Pink",
+            "cost" : 36.42
+        },
+        "80991152782" :{
+            "name": "P2 or P2s,Mint",
+            "cost" : 36.42
+        }
+    },
+    "3893612017" : {
+        "name" : "Original Silicon",
+        "46249733632" :{
+            "name": "Yellow",
+            "cost" : 74.77
+        },
+        "46249733633" :{
+            "name": "Green",
+            "cost" : 74.77
+        },
+        "46249733634" :{
+            "name": "Violet",
+            "cost" : 74.77
+        }
+    },
+    "9456000272" : {
+        "name" : "iBleem Printer",
+        "57364578721" :{
+            "q" : 3,
+            "name" : "9r coloredstickers",
+            "cost" : 132.66
+        },
+        "57906889811" :{
+            "q" : 4,
+            "name" : "12r thermal stickers",
+            "cost" : 120.08
+        },
+        "58018103429" :{
+            "q" : 1,
+            "name" : "3r (10yr keep) paper",
+            "cost" : 116.84
+        },
+        "58018103430" :{
+            "q" : 1,
+            "name" : "3r 5yr keep sticker",
+            "cost" : 143.09
+        },
+        "82089426715" :{
+            "q" : 1,
+            "name" : "Pink without strap",
+            "cost" : 470.81
+        },
+        "82089426716" :{
+            "q" : 1,
+            "name" : "Blue without strap",
+            "cost" : 470.81
+        },
+        "84426191949" :{
+            "q" : 3,
+            "name" : "9rolls coloredpapers",
+            "cost" : 64.98
+        },
+        "104102625305" :{
+            "q" : 2,
+            "name" : "6rolls blue ink",
+            "cost" : 116.2
+        },
+        "104102625306" :{
+            "q" : 1,
+            "name" : "3rolls pink ink",
+            "cost" : 145.78
+        },
+        "122547630356" :{
+            "q" : 4,
+            "name" : "12r assortedthermals",
+            "cost" : 117.56
+        },
+        "150290440630" :{
+            "q" : 1,
+            "name" : "Pink with stap",
+            "cost" : 470.81
+        },
+        "150290440631" : {
+            "q" : 1,
+            "name" : "Green with strap",
+            "cost" : 470.81
+        }
+    },
+    "10786374705" : {
+        "name" : "iBleem Printer",
+        "86844706026" :{
+            "q" : 3,
+            "name" : "9r coloredstickers",
+            "cost" : 132.66
+        },
+        "86844706027" :{
+            "q" : 4,
+            "name" : "12r thermal stickers",
+            "cost" : 120.08
+        },
+        "86844706022" :{
+            "q" : 1,
+            "name" : "3r (10yr keep) paper",
+            "cost" : 116.84
+        },
+        "86844706029" :{
+            "q" : 1,
+            "name" : "3r 5yr keep sticker",
+            "cost" : 143.09
+        },
+        "86844706023" :{
+            "q" : 1,
+            "name" : "Pink without strap",
+            "cost" : 470.81
+        },
+        "86844706019" :{
+            "q" : 1,
+            "name" : "Blue without strap",
+            "cost" : 470.81
+        },
+        "86844706025" :{
+            "q" : 3,
+            "name" : "9rolls coloredpapers",
+            "cost" : 64.98
+        },
+        "86844706021" :{
+            "q" : 2,
+            "name" : "6rolls blue ink",
+            "cost" : 116.2
+        },
+        "86844706028" :{
+            "q" : 1,
+            "name" : "3rolls pink ink",
+            "cost" : 145.78
+        },
+        "86844706024" :{
+            "q" : 4,
+            "name" : "12r assortedthermals",
+            "cost" : 117.56
+        },
+        "86844706030" :{
+            "q" : 1,
+            "name" : "Pink with stap",
+            "cost" : 470.81
+        },
+        "86844706020" : {
+            "q" : 1,
+            "name" : "Green with strap",
+            "cost" : 470.81
+        }
+    },
+    "7557331090" : {
+        "name" : "Paperang P1",
+        "51684509580" : {
+            "name" : "p1 pink",
+            "cost" : 1042.40
+        },
+        "51684509581" : {
+            "name" : "p1 mint",
+            "cost" : 1042.40
+        }
+    },
+    "3355461227" : {
+        "41684571712" : {
+            "name" : "p1 pink + 10y TP",
+            "cost" :0
+        },
+        "41684571713" : {
+            "name" : "p1 mint + case",
+            "cost" :0
+        },
+        "41684571714" : {
+            "name" : "p1 pink + translucent roll",
+            "cost" :0
+        },
+        "41684571715" : {
+            "name" : "p1 mint + 10y TP",
+            "cost" :0
+        },
+        "41684571716" : {
+            "name" : "p1 mint + 5y TS",
+            "cost" :0
+        },
+        "41684571717" : {
+            "name" : "p1 white + case",
+            "cost" :0
+        },
+        "41684571718" : {
+            "name" : "p1 white + 10y TP",
+            "cost" :0
+        },
+        "41684571719" : {
+            "name" : "p1 white + 5y TS",
+            "cost" :0
+        },
+        "41684571720" : {
+            "name" : "p1 pink + case",
+            "cost" :0
+        },
+        "41684571721" : {
+            "name" : "p1 mint + translucent roll",
+            "cost" :0
+        },
+        "41684571722" : {
+            "name" : "p1 white",
+            "cost" :0
+        },
+        "41684571723" : {
+            "name" : "p1 white + translucent roll",
+            "cost" :0
+        },
+        "41684571724" : {
+            "name" : "p1 pink",
+            "cost" :0
+        },
+        "41684571725" : {
+            "name" : "p1 pink + 5y TS",
+            "cost" :0
+        },
+        "41684571726" : {
+            "name" : "p1 mint",
+            "cost" : 0
+        }
+    }
+}

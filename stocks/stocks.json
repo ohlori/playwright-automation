@@ -1,0 +1,190 @@
+{
+    "products" : [
+        {
+            "000001" : 0,
+            "item" : "Generic Thermal Sticker",
+            "count_alert" : 0,
+            "cost" : 0
+        },
+        {
+            "000002" : 1,
+            "item" : "Generic Colored",
+            "variants" : [
+                {
+                    "000002-001" : 0,
+                    "item" : "paperang colored paper",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000002-002" : 0,
+                    "item" : "colored sticker",
+                    "count_alert" : 0,
+                    "cost" : 0
+                }
+            ]        
+        },
+        {
+            "000003" : 1,
+            "item" : "Paperang Themal Rolls",
+            "variants" : [
+                {
+                    "000003-001" :0,
+                    "item": "ThermalRefill(10yrs)",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000003-001" :0,
+                    "item": "ThermalSticker(5yrs)",
+                    "count_alert" : 0,
+                    "cost" : 0
+                }
+            ]
+        },
+        {
+            "000004" : 0,
+            "item" : "Blue Ink",
+            "count_alert" : 0,
+            "cost" : 0
+        },
+        {
+            "000005" : 0,
+            "name" : "Pink Ink",
+            "count_alert" : 0,
+            "cost" : 0
+        },
+        {
+            "000006" : 1,
+            "item" : "HD Stickers",
+            "variants" : [
+                {
+                    "000006-001" : 0,
+                    "item" : "Translucent,1 Roll",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000006-002" : 0,
+                    "item" : "Transparent-P1 only,1 Roll",
+                    "count_alert" : 0,
+                    "cost" : 0
+                }
+                ]
+            },
+        {
+            "000007" : 0,
+            "item" : "Generic TS P3",
+            "count_alert" : 0,
+            "cost" : 0
+        },
+        {
+            "000008" : 0,
+            "item" : "Paperang P3 TP",
+            "count_alert" : 0,
+            "cost" : 0
+        },
+        {
+            "000009" : 0,
+            "item" :"Hard Case",
+            "count_alert" : 0,
+            "cost" : 0
+        },
+        {
+            "000010" : 1,
+            "item" : "Silicon Case",
+            "variants" : [
+                {
+                    "000010-001" : 0,
+                    "item": "P1 or P1s,White",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000010-002" : 0,
+                    "item": "P1 or P1s,Pink",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000010-003" : 0,
+                    "item": "P1 or P1s,Mint",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000010-004" : 0,
+                    "item": "P2 or P2s,White",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000010-005" : 0,
+                    "item": "P2 or P2s,Pink",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000010-006" : 0,
+                    "item": "P2 or P2s,Mint",
+                    "count_alert" : 0,
+                    "cost" : 0
+                }
+            ]
+        },
+        {
+            "000011" : 0,
+            "item" : "Original Silicon",
+            "variants" : [
+                {
+                    "000011-001" : 0,
+                    "item": "P1",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000011-002" : 0,
+                    "item": "P2",
+                    "count_alert" : 0,
+                    "cost" : 0
+                }
+            ]
+        },
+        {
+            "000012" : 0,
+            "item" : "Paperang P1",
+            "count_alert" : 0,
+            "cost" : 0
+        },
+        {
+            "000013" : 1,
+            "item" : "iBleem Printer",
+            "variants" : [
+                {
+                    "000013-001" : 0,
+                    "item" : "Pink without strap",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000013-002" : 0,
+                    "item" : "Blue without strap",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000013-003" : 0,
+                    "item" : "Pink with stap",
+                    "count_alert" : 0,
+                    "cost" : 0
+                },
+                {
+                    "000013-004" : 0,
+                    "item" : "Green with strap",
+                    "count_alert" : 0,
+                    "cost" : 0
+                }
+            ]
+        }
+    ]
+}

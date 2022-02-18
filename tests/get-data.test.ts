@@ -21,12 +21,12 @@ test("Get COMPLETED items", async ({ request, baseURL }) => {
 
 
 /* GOAL: Get all to-ship orders to automatically log it on the inventory to get the net incomes daily (uncollected)
- * TODO: combine total in all the pages
  * 1. 
  * 2. 
  * 3. 
 **/
 test("Get all TO SHIP items", async ({ request, baseURL }) => {
+    test.setTimeout(0);
     let count = 1;
     let pages, combinedResponses;
 
@@ -87,10 +87,51 @@ test("Get all TO SHIP items", async ({ request, baseURL }) => {
     );
 })
 
+test("Calculate the profit", async () => {
+    let products = await base.loadJSONData("/stocks/products.json");
+    let toship = await base.loadJSONData("/result/to-ship-total-copy.json");
+    const items = toship.orders;
+    let data = [];
+
+    await base.loopJsonData ("/result/to-ship-total.json", "orders", async function(obj) {
+        let total=0, resArray={};
+        const item = obj.order_items;
+        for (let x = 0; x<item.length; x++) {
+            let currentCost;
+            if (item[x].item_id !== 5466601122 && item[x].item_id !== 9796544496 && item[x].item_id !== 13266021243 &&
+                item[x].item_id !== 10823437701 && item[x].item_id !== 8248315539 && item[x].item_id !== 7277574568 ) {
+                // Excluding piso print, waybill printer, comb binding, japanese from zero, korean from zero, harrison's
+                currentCost = products[item[x].item_id][item[x].model_id]["cost"] * item[x].quantity;
+                const netprof = (item[x].total - item[x].charge) - currentCost;
+                total = total + netprof;
+                resArray[item[x].model_id] = Number(netprof.toFixed(2));
+            // Items that need to be analyze because listing has a combined products: 3355461227 - Paperang+
+            } else if (item[x].item_id === 3355461227){
+
+            }        
+        }
+        
+        data.push(await Object.assign(obj, {
+            profit: {
+                total: Number(total.toFixed(2)),
+                ...resArray
+            } 
+        }));
+    });
+    
+    const processed = base.processOrderBody(data);
+    let to_ship = JSON.stringify(await processed,undefined,2).replace(/\]\s*\]\s/, "]").replace(/\[\s*\[\s/, "[\n").replace(/\],\s*\[\s/, ",");
+    await fs.writeFile ("./result/to-ship-total.json", to_ship, async function(err) {
+        if (err) throw err;
+            console.log('complete');
+        }
+    );
+})
+
 test("DAILY NET REPORT", async () => {
     const info = await base.loadContent("/result/to-ship-total.json");
     const data =  await base.locateJSON(await info);
     
     console.log("Daily Net Sales : ₱" + String(Number(await await data.orders.map(x => x.net).reduce((acc, x) => x+acc, 0)).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-    //console.log("Daily Net Profit: ₱" + String(Number(await await data.orders.map(x => x.net).reduce((acc, x) => x+acc, 0)).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+    console.log("Daily Net Profit: ₱" + String(Number(await await data.orders.map(x => x.profit.total).reduce((acc, x) => x+acc, 0)).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
 })

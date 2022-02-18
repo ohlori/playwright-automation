@@ -68,5 +68,13 @@ export class Base {
         await Promise.all(promises);
     }
 
-    loadJSONData
+    public loadJSONData(path: string, testData?: any) {
+        let jsonPath;
+
+        this.contentPath = join(process.cwd(), path);
+        this.contentPath = normalizer.normalize(this.contentPath);
+        this.contentPath = JSON.parse(fs.readFileSync(this.contentPath, "utf8"));
+        jsonPath = this.contentPath;
+        return (testData === undefined || testData === 0) ? jsonPath :jsonPath[testData];
+    }
 }
