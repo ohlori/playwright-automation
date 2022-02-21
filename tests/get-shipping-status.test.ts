@@ -7,7 +7,7 @@ const base = new Base();
 const call = new Calls();
 
 test("Get SHIPPING ORDER ID info", async ({ request, baseURL }) => {
-    await call.getShippingStat({ request, baseURL });
+    await call.getShippingInfo({ request, baseURL });
 })
 
 test("Get SHIPPPING status", async ({ request, baseURL }) => {
