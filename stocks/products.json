@@ -2,7 +2,7 @@
     "7980571205" : {
         "33914673500" : {
             "name" : "Generic TS",
-            "cost" : 30.02
+            "cost" : 29.15
         }
     },
     "15245117323" : {
@@ -251,73 +251,87 @@
         "name" : "Paperang P1",
         "51684509580" : {
             "name" : "p1 pink",
-            "cost" : 1042.40
+            "cost" : 1085.72
         },
         "51684509581" : {
             "name" : "p1 mint",
-            "cost" : 1042.40
+            "cost" : 1085.72
         }
     },
     "3355461227" : {
         "41684571712" : {
             "name" : "p1 pink + 10y TP",
-            "cost" :0
+            "cost" : 12002.56
         },
         "41684571713" : {
             "name" : "p1 mint + case",
-            "cost" :0
+            "cost" : 1133.36
         },
         "41684571714" : {
             "name" : "p1 pink + translucent roll",
-            "cost" :0
+            "cost" : 1160.77
         },
         "41684571715" : {
             "name" : "p1 mint + 10y TP",
-            "cost" :0
+            "cost" : 12002.56
         },
         "41684571716" : {
             "name" : "p1 mint + 5y TS",
-            "cost" :0
+            "cost" : 1228.84
         },
         "41684571717" : {
             "name" : "p1 white + case",
-            "cost" :0
+            "cost" : 1133.36
         },
         "41684571718" : {
             "name" : "p1 white + 10y TP",
-            "cost" :0
+            "cost" : 12002.56
         },
         "41684571719" : {
             "name" : "p1 white + 5y TS",
-            "cost" :0
+            "cost" : 1228.84
         },
         "41684571720" : {
             "name" : "p1 pink + case",
-            "cost" :0
+            "cost" : 1133.36
         },
         "41684571721" : {
             "name" : "p1 mint + translucent roll",
-            "cost" :0
+            "cost" : 1160.77
         },
         "41684571722" : {
             "name" : "p1 white",
-            "cost" :0
+            "cost" : 1085.72
         },
         "41684571723" : {
             "name" : "p1 white + translucent roll",
-            "cost" :0
+            "cost" : 1160.77
         },
         "41684571724" : {
             "name" : "p1 pink",
-            "cost" :0
+            "cost" : 1085.72
         },
         "41684571725" : {
             "name" : "p1 pink + 5y TS",
-            "cost" :0
+            "cost" : 1228.84
         },
         "41684571726" : {
             "name" : "p1 mint",
-            "cost" : 0
+            "cost" : 1085.72
+        }
+    },
+    "17007936927" : {
+        "115508344249": {
+            "name" : "mini cutter - pink",
+            "cost" : 13.34
+        },
+        "115508344247": {
+            "name" : "mini cutter - white",
+            "cost" : 13.34
+        },
+        "115508344248": {
+            "name" : "mini cutter - blue",
+            "cost" : 13.34
         }
     }
 }

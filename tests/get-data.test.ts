@@ -26,6 +26,11 @@ test("Save to database", async () => {
     await call.saveToDB();
 })
 
+test("Delete cancelled orders", async ({ request, baseURL }) => {
+    test.setTimeout(0);
+    await call.deleteCancelled({ request, baseURL });
+})
+
 test("DAILY NET REPORT", async () => {
     const info = await base.loadContent("/result/to-ship-total.json");
     const data =  await base.locateJSON(await info);

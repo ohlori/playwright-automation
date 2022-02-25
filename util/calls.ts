@@ -27,7 +27,7 @@ export class Calls {
         let pages, combinedResponses;
 
         do {
-            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
+            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
             let rspn = await JSON.parse(JSON.stringify(await res_.json()));
             let infos = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": "PH", "shop_id": 271248938, order_date: x.order_create_time}));
             
@@ -222,5 +222,46 @@ export class Calls {
         );
 
         console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
+    }
+
+    public async deleteCancelled({ request, baseURL }): Promise<any> {
+        let orders = await base.loadJSONData("/db/orders.json");
+
+        const cancelled_list = await request.get(baseURL + "/api/v3/order/get_order_id_list?source=cancelled_all&page_number=1");
+        let rspn = await JSON.parse(JSON.stringify(await cancelled_list.json()));
+        
+        await fs.writeFile ("./db/x.json", JSON.stringify(await cancelled_list.json(),undefined,2), async function(err) {
+            if (err) throw err;
+                console.log('complete');
+            }
+        );
+
+
+        const toDelete = rspn.data.orders.length;
+        let indexes = new Set();
+        for (let x=0; x<toDelete; x++){
+            if (await orders.orders.filter(z => z.order_id === rspn.data.orders[x].order_id).length === 1){
+                const index = await orders.orders.findIndex(z => z.order_id === rspn.data.orders[x].order_id);
+                indexes.add(index);
+                // For terminal reporting only
+                if (indexes.size === 1) {
+                    console.log("\x1b[31m%s\x1b[0m", "\t-------- CANCELLED ORDERS --------");
+                }
+                console.log("\x1b[31m%s\x1b[0m", "\t\t  " +rspn.data.orders[x].order_id);
+            }
+        }
+        // For terminal reporting only
+        if (indexes.size > 0) {
+            console.log("\x1b[31m%s\x1b[0m", "\t--------------------------------");
+        }
+
+        let new_orders = orders.orders.filter((x, i) => !indexes.has(i));
+        new_orders = Object.assign({orders: new_orders});
+        orders = JSON.stringify(new_orders,undefined,2);
+        await fs.writeFile ("./db/orders.json", orders, async function(err) {
+            if (err) throw err;
+                console.log('complete');
+            }
+        );
     }
 }
