@@ -1,0 +1,14 @@
+{
+  "start": {
+    "onHand" : 0,
+    "s_position" : 0,
+    "s_order_id" : 0
+  },
+  "expense" : [
+    {
+      "date" : "mm-dd-yyyy",
+      "amount": 0,
+      "comment" : "details"
+    }
+  ]
+}
