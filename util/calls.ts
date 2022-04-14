@@ -264,4 +264,124 @@ export class Calls {
             }
         );
     }
+
+    public async getAllCompleted({ request, baseURL }): Promise<any> {
+        let completed = await base.loadJSONData("/db/s-completed.json");
+        let page = 1;
+        let found = false;
+        let toAdd = [];
+        let count = 0;
+        do {
+            const res = await request.get(baseURL + "/api/v3/finance/get_wallet_transactions/?wallet_type=0&transaction_types=101,102&page_size=30&page_number="+page);
+            let response = await JSON.parse(JSON.stringify(await res.json()));
+            const size = response.data.list.length;
+
+            for (let x = 0; x<size; x++) {
+                if(await completed.orders.filter(z => z.order_sn === response.data.list[x].order_sn).length === 0){
+                    ++count;
+                    const item = {"order_id": response.data.list[x].target_id, "order_sn" : response.data.list[x].order_sn, 
+                                "amount" : response.data.list[x].amount, "refund": 0, "transaction_id": response.data.list[x].transaction_id};
+                    toAdd.push(await item);
+                } else {
+                    found = true;
+                    break;
+                }
+            }
+
+            page = found === false ? page+1: page;
+        } while (found === false);
+
+        const combined = Object.assign(completed, {toAdd});
+        const updatedList = JSON.stringify(await combined,undefined,2).replace(/\s\],\s\s*\"toAdd\": \[\s/, ",\n").replace("\n ,", ",");
+        await fs.writeFile ("./db/s-completed.json", updatedList.replace(/,\s*\"toAdd\": \[\]\s/, "\n"), async function(err) {
+            if (err) throw err;
+                console.log('complete');
+            }
+        );
+        console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
+    }
+
+    public async getAllRefund({ request, baseURL }): Promise<any> {
+        let combinedResponses, res_size;
+        let page = 1;
+        do {
+            const res = await request.get(baseURL + "/api/v2/return/list?SPC_CDS_VER=2&page_size=100&page_number=" + page);
+            let response = await JSON.parse(JSON.stringify(await res.json()));
+            res_size = response.data.list.length;
+            let infos = await response.data.list.map((x) => ({"order_id": x.order_id, "return_id": x.return_id, "refund_amount": x.refund_amount, status: x.return_header.status_text_key}));
+
+            for (let x=0; x<infos.length; x++) {
+                if(infos[x].status.includes("completed")){
+                    combinedResponses = (await combinedResponses + await JSON.stringify(await infos[x],undefined,2)).replace("\n}{","\n\t},\n\t{");;
+                }
+            }
+            ++page;
+        } while (res_size !==0)
+
+        combinedResponses = await combinedResponses.replace("undefined", "{ \"orders\": [");
+        await fs.writeFile ("./result/refund.json", await combinedResponses.replace("\n}","\n\t}") + "\n]}" , async function(err) {
+            if (err) throw err;
+                console.log('complete');
+            }
+        );
+    }
+
+    public async auditShopeeIncomeComp(): Promise<any> {
+        let expectedOrderCharges = await base.loadJSONData("/db/orders.json");
+        let actualOrderCharges = await base.loadJSONData("/db/s-completed.json");
+        let shipping = await base.loadJSONData("/result/shipping-status.json");
+        let to_ship = await base.loadJSONData("/result/to-ship-total.json");
+        let valid_discrep = await base.loadJSONData("/db/valid-discrepancy.json");
+        let refund = await base.loadJSONData("/result/refund.json");
+        const size = expectedOrderCharges.orders.length;
+        
+        let combinedResponses = { orders : [] };
+        let count=0, totalDiscrp = 0;
+        for (let x = 0; x< size; x++) {
+            let result = await actualOrderCharges.orders.filter(z => z.order_sn === expectedOrderCharges.orders[x].order_sn);
+            
+            try {
+                // Check if expected amount is not equal from the actual that was listed in Shopee
+                if (await valid_discrep.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id).length === 0 &&
+                        result[0].amount !== expectedOrderCharges.orders[x].net) {
+                    // Check the if the actual amount is less than the expected
+                    if (result[0].amount < expectedOrderCharges.orders[x].net) {
+                        // Find in the refund lists if there was a refund/return trasaction
+                        let refund_detail = await refund.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id);
+                        let new_e = expectedOrderCharges.orders[x].total - Number(refund_detail[0].refund_amount);
+                        const new_charges = Math.round(new_e * 0.0224) + Math.round(new_e * 0.01);
+                        new_e = await new_e - new_charges;
+                        const discrep = new_e - Number(result[0].amount);
+                        totalDiscrp = totalDiscrp +discrep;
+                        if (result[0].amount !== new_e) {
+                            combinedResponses.orders.push({status: "discrepancy", order_id: expectedOrderCharges.orders[x].order_id,
+                                                    return_id:refund_detail[0].return_id, e_amount: new_e, a_amount: result[0].amount, discrep_amount: discrep});
+                            ++count;
+                            // console.log(expectedOrderCharges.orders[x].total + " - " + Number(refund_detail[0].refund_amount) + "-" + new_charges + " = "+ await new_e);
+                            // console.log("[ORDER ID:"+expectedOrderCharges.orders[x].order_id + "][RETURN ID: " +refund_detail[0].return_id + "]"+
+                            //             "["+ await base.pesoFormat(result[0].amount) +"][E: "+await base.pesoFormat(new_e) +"]");
+                        }
+                    }
+                }
+            // DATA NOT FOUND
+            }catch (e) {
+                let order_id;
+                if (await shipping.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id).length === 0 &&
+                    await to_ship.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id).length === 0 &&
+                    await refund.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id).length === 0) {
+                    combinedResponses.orders.push({status: "missing", order_id: expectedOrderCharges.orders[x].order_id, e_amount: expectedOrderCharges.orders[x].net});
+                    ++count;
+                    //console.log("\x1b[31m%s\x1b[0m","NOT FOUND: " + expectedOrderCharges.orders[x].order_id +" | MISSING: " + expectedOrderCharges.orders[x].net.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+            }
+        }
+        
+        await fs.writeFile ("./action_item/to-report.json", JSON.stringify(await combinedResponses,undefined,2), async function(err) {
+            if (err) throw err;
+                console.log('complete');
+            }
+        );
+        console.log("\x1b[31m%s\x1b[0m","TOTAL ITEMS WITH ISSUE: " + count);
+        console.log("\x1b[31m%s\x1b[0m","TOTAL MISSING AMOUNT: " + await base.pesoFormat(totalDiscrp));
+    }
 }

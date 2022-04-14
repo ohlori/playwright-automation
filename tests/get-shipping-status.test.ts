@@ -6,6 +6,12 @@ var fs = require("fs/promises");
 const base = new Base();
 const call = new Calls();
 let total=0;
+
+test("Get all COMPLETED transaction items with amount", async ({ request, baseURL }) => {
+    test.setTimeout(0);
+    await call.getAllCompleted({ request, baseURL });
+})
+
 test("Get SHIPPPING status", async ({ request, baseURL }) => {
     test.setTimeout(0);
     await call.getShippingStat({ request, baseURL });

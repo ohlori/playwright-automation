@@ -77,4 +77,9 @@ export class Base {
         jsonPath = this.contentPath;
         return (testData === undefined || testData === 0) ? jsonPath :jsonPath[testData];
     }
+
+    public pesoFormat(amount: any): string {
+        let formatted = "₱ " + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return formatted;
+    }
 }
