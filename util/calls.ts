@@ -27,7 +27,7 @@ export class Calls {
         let pages, combinedResponses;
 
         do {
-            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
+            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
             let rspn = await JSON.parse(JSON.stringify(await res_.json()));
             let infos = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": "PH", "shop_id": 271248938, order_date: x.order_create_time}));
             
@@ -57,7 +57,7 @@ export class Calls {
                                                     total_plus_sf : totalwsf = Number(x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => Number(y+total)) + Number(x.shipping_fee)),
                                                     e_charges: totalcharges = Number(Number(totalwsf * 0.01).toFixed()) + 
                                                             Number(Number(totalwsf * 0.0224).toFixed()),
-                                                    net : totalwsf - totalcharges,
+                                                    net : total - totalcharges,
                                                     //order_date: x,
                                                     // order_completed: x,
                                                     buyer_username: x.buyer_user.user_name, buyer_name : x.buyer_address_name, 
@@ -96,9 +96,22 @@ export class Calls {
             const item = obj.order_items;
             for (let x = 0; x<item.length; x++) {
                 let currentCost;
+                // Excluding piso print, waybill printer, comb binding, japanese from zero, korean from zero, harrison's
                 if (item[x].item_id !== 5466601122 && item[x].item_id !== 9796544496 && item[x].item_id !== 13266021243 &&
                     item[x].item_id !== 10823437701 && item[x].item_id !== 8248315539 && item[x].item_id !== 7277574568 ) {
-                    // Excluding piso print, waybill printer, comb binding, japanese from zero, korean from zero, harrison's
+                    //Check if ITEM ID is in the products db
+                    try {
+                        await products[item[x].item_id]
+                    }catch (error) {
+                        console.log ("[ORDER ID: " +obj.order_sn+ "] Missing ITEM ID: " + item[x].item_id);
+                    }
+
+                    //Check if MODEL ID is in the products db
+                    try {
+                        await products[item[x].item_id][item[x].model_id]["cost"];
+                    }catch (error) {
+                        console.log ("[ORDER ID: " +obj.order_sn+ " | ITEM ID: " +item[x].item_id+ "] Missing MODEL ID: " + item[x].model_id);
+                    }
                     currentCost = products[item[x].item_id][item[x].model_id]["cost"] * item[x].quantity;
                     const netprof = (item[x].total - item[x].charge) - currentCost;
                     total = total + netprof;
@@ -127,7 +140,7 @@ export class Calls {
         );
     }
 
-    public async getShippingInfo({ request, baseURL }): Promise<any> {
+    public async getShippingStat({ request, baseURL }): Promise<any> {
         let count = 1;
         let pages;
         let infos;
@@ -150,24 +163,12 @@ export class Calls {
             //console.log(combinedResponses);
         } while (count <= pages);
 
-        //console.log(combinedResponses);
-        const data = await base.processOrderBody(JSON.parse(combinedResponses));
-        await fs.writeFile ("./result/shipping-order-ids.json", await JSON.stringify(await data,undefined,2), async function(err) {
-            if (err) { throw err }
-            console.log("complete");
-        }
-        );
-    }
-
-    public async getShippingStat({ request, baseURL }): Promise<any> {
-        // Order IDS to be searched
-        const order_ids = await base.getJSONData("/result/shipping-order-ids.json");
+        let combinedRes;
+        const order_ids = await base.processOrderBody(JSON.parse(combinedResponses));
         const total_order_ids = Object.keys(await order_ids.orders).length;
-        let combinedResponses;
 
         // JSON file to be checked
         const info = await base.loadContent("/result/shipping-status.json");
-        const orders =  await base.locateJSON(await info);
 
         for (let x = 0; x < total_order_ids; x++) {
             const current_val = Number(Object.values(await order_ids.orders[x]));
@@ -186,11 +187,10 @@ export class Calls {
                                         (Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee))}));
 
             stat = await JSON.stringify(await stat[0], undefined,2);
-            combinedResponses = (await combinedResponses + await stat).replace("\n}{","\n},\n{");
+            combinedRes = (await combinedRes + await stat).replace("\n}{","\n},\n{");
         }
 
-        //console.log(await combinedResponses);
-        await fs.writeFile ("./result/shipping-status.json", await combinedResponses.replace("undefined","{ \"orders\" : [") + "\n]\n}", async function(err) {
+        await fs.writeFile ("./result/shipping-status.json", await combinedRes.replace("undefined","{ \"orders\" : [") + "\n]\n}", async function(err) {
             if (err) { throw err }
             console.log("complete");
         }    

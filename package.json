@@ -4,7 +4,9 @@
     "all": "npx playwright test",
     "shipping" : "npx playwright test tests/get-shipping-status.test.ts",
     "q-sum" : "npx playwright test tests/quick-summary.test.ts",
-    "to-ship" : "npx playwright test tests/get-data.test.ts"
+    "to-ship" : "npx playwright test tests/get-data.test.ts",
+    "test" : "npx playwright test tests/practice.test.ts",
+    "net" : "npx playwright test tests/get-net.test.ts"
   },
   "devDependencies": {
     "@types/node": "^17.0.5",

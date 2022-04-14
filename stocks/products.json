@@ -1,6 +1,14 @@
 {
     "7980571205" : {
-        "33914673500" : {
+        "171059093981" : {
+            "name" : "Generic TS",
+            "cost" : 29.15
+        },
+        "171059093980" : {
+            "name" : "10yrs",
+            "cost" : 27.90
+        },
+        "116076043870" : {
             "name" : "Generic TS",
             "cost" : 29.15
         }
@@ -32,9 +40,9 @@
             "name": "ThermalSticker(5yrs)",
             "cost" : 143.09
         },
-        "93785295484" :{
-            "name": "GenericSticker-OEM",
-            "cost" : 0
+        "87169126766" :{
+            "name": "ThermalRefill(2yrs)",
+            "cost" : 95.58
         }
     },
     "12712978392" : {
@@ -261,7 +269,7 @@
     "3355461227" : {
         "41684571712" : {
             "name" : "p1 pink + 10y TP",
-            "cost" : 12002.56
+            "cost" : 1202.56
         },
         "41684571713" : {
             "name" : "p1 mint + case",
@@ -273,7 +281,7 @@
         },
         "41684571715" : {
             "name" : "p1 mint + 10y TP",
-            "cost" : 12002.56
+            "cost" : 1202.56
         },
         "41684571716" : {
             "name" : "p1 mint + 5y TS",
@@ -285,7 +293,7 @@
         },
         "41684571718" : {
             "name" : "p1 white + 10y TP",
-            "cost" : 12002.56
+            "cost" : 1202.56
         },
         "41684571719" : {
             "name" : "p1 white + 5y TS",
@@ -321,6 +329,7 @@
         }
     },
     "17007936927" : {
+        "name" : "mini cutter",
         "115508344249": {
             "name" : "mini cutter - pink",
             "cost" : 13.34
@@ -332,6 +341,155 @@
         "115508344248": {
             "name" : "mini cutter - blue",
             "cost" : 13.34
+        }
+    },
+    "16223072142" : {
+        "name" : "50 sheets mini vintage paper",
+        "87142581946": {
+            "name" : "Flower Cluster",
+            "cost" : 30.82
+        },
+        "87142581947": {
+            "name" : "Daily Things",
+            "cost" : 30.82
+        },
+        "87142581948": {
+            "name" : "Elapsed Time",
+            "cost" : 30.82
+        },
+        "87142581949": {
+            "name" : "Depth of Silence",
+            "cost" : 30.82
+        },
+        "87142581950": {
+            "name" : "The Strong Link",
+            "cost" : 30.82
+        },
+        "87142581951": {
+            "name" : "Botanical Garden",
+            "cost" : 30.82
+        },
+        "87142581952": {
+            "name" : "Japanese Style 1",
+            "cost" : 30.82
+        },
+        "87142581953": {
+            "name" : "Japanese Style 2",
+            "cost" : 30.82
+        },
+        "87142581954": {
+            "name" : "Pursuit of Happiness",
+            "cost" : 30.82
+        },
+        "87142581955": {
+            "name" : "Astrology",
+            "cost" : 30.82
+        },
+        "87142581956": {
+            "name" : "Letters",
+            "cost" : 30.82
+        }
+    },
+    "16223032120" : {
+        "name" : "400 sheets butter paper",
+        "68484984664": {
+            "name" : "Green Random 366pcs",
+            "cost" : 124.47
+        },
+        "87142034829": {
+            "name" : "Flowers 366pcs",
+            "cost" : 124.47
+        },
+        "134665814988": {
+            "name" : "Life Art 400pcs",
+            "cost" : 124.47
+        },
+        "134665814989": {
+            "name" : "Flowers of Soda 400p",
+            "cost" : 124.47
+        },
+        "134665814990": {
+            "name" : "Bennet's Manor 400pc",
+            "cost" : 124.47
+        },
+        "134665814991": {
+            "name" : "Sunset Shadows  400",
+            "cost" : 124.47
+        },
+        "134665814992": {
+            "name" : "Pop Art 366pcs",
+            "cost" : 124.47
+        },
+        "134665814993": {
+            "name" : "Lonely Eyes 366pcs",
+            "cost" : 124.47
+        },
+        "134665814994": {
+            "name" : "Flower&Painting 400",
+            "cost" : 124.47
+        },
+        "134665814995": {
+            "name" : "AncientCastle 400pcs",
+            "cost" : 124.47
+        },
+        "134665814996": {
+            "name" : "Clouds 400pcs",
+            "cost" : 124.47
+        },
+        "134665814997": {
+            "name" : "Minimalist 400pcs",
+            "cost" : 124.47
+        },
+        "134665814998": {
+            "name" : "1999 400pcs",
+            "cost" : 124.47
+        },
+        "134665814999": {
+            "name" : "Sunflower 400pcs",
+            "cost" : 124.47
+        },
+        "134665815000": {
+            "name" : "Purple Sky 400pcs",
+            "cost" : 124.47
+        },
+        "134665815001": {
+            "name" : "Starry Night 366pcs",
+            "cost" : 124.47
+        },
+        "134665815002": {
+            "name" : "Memories 366pcs",
+            "cost" : 124.47
+        }
+    },
+    "13681738239" : {
+        "name" : "Washi Cassette Tape",
+        "87141324698": {
+            "name" : "Black",
+            "cost" : 41.47
+        },
+        "87141324699": {
+            "name" : "White",
+            "cost" : 41.47
+        },
+        "87141324700": {
+            "name" : "Blue",
+            "cost" : 41.47
+        },
+        "87141324701": {
+            "name" : "Green",
+            "cost" : 41.47
+        },
+        "87141324702": {
+            "name" : "Orange",
+            "cost" : 41.47
+        },
+        "87141324703": {
+            "name" : "Violet",
+            "cost" : 41.47
+        },
+        "87141324704": {
+            "name" : "Pink",
+            "cost" : 41.47
         }
     }
 }
