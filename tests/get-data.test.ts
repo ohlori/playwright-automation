@@ -19,6 +19,10 @@ test("Save to database", async () => {
     await call.saveToDB();
 })
 
+test("Clean up to ship data", async () => {
+    await call.cleanUpToShip();
+})
+
 test("Delete cancelled orders", async ({ request, baseURL }) => {
     test.setTimeout(0);
     await call.deleteCancelled({ request, baseURL });

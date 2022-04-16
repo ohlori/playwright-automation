@@ -25,9 +25,10 @@ export class Calls {
     public async getAllToShip({ request, baseURL }): Promise<any> {
         let count = 1;
         let pages, combinedResponses;
+        let products = await base.loadJSONData("/stocks/products.json");
 
         do {
-            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
+            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
             let rspn = await JSON.parse(JSON.stringify(await res_.json()));
             let infos = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": "PH", "shop_id": 271248938, order_date: x.order_create_time}));
             
@@ -48,9 +49,12 @@ export class Calls {
                     data: viewData
                 });
 
+
+                
                 let total, totalwsf, totalcharges ;
                 info = await JSON.parse(JSON.stringify(await resDetails.json()));
                 orders = await info.data.orders.map((x) => ({order_id : x.order_id, order_sn : x.order_sn,
+                    tracking_num: String(rspn.data.package_list.filter(j => j.order_sn === x.order_sn).map(k => k.third_party_tn)).replace("[", "").replace("]", ""),
                                                     order_date: infos.filter(z => z.order_id === x.order_id)[0].order_date,
                                                     total: total = x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => y+total),
                                                     shipping_fee : Number(x.shipping_fee),
@@ -68,7 +72,8 @@ export class Calls {
                                                         quantity: y.amount, 
                                                         price: Number(y.order_price),
                                                         total: Number(y.order_price) * y.amount,
-                                                        charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed())
+                                                        charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed()),
+                                                        image: products[y.item_id][y.model_id]["image"]
                                                     }))}));
                 combinedResponses = (combinedResponses + await JSON.stringify(await orders,undefined,2)).replace("\n][",",");
             }
@@ -77,7 +82,7 @@ export class Calls {
             //console.log(combinedResponses);
         } while (count <= pages);
 
-        await fs.writeFile ("./result/to-ship-total.json", await combinedResponses, async function(err) {
+        await fs.writeFile ("./result/to-ship.json", await combinedResponses, async function(err) {
             if (err) throw err;
                 console.log('complete');
             }
@@ -88,7 +93,7 @@ export class Calls {
         let products = await base.loadJSONData("/stocks/products.json");
         let data = [];
 
-        await base.loopJsonData ("/result/to-ship-total.json", "orders", async function(obj) {
+        await base.loopJsonData ("/result/to-ship.json", "orders", async function(obj) {
             const date = new Date(obj.order_date* 1e3).toLocaleDateString("en-US");
             const dateNow = date.split(", ")[0].split("/").join("/");
             
@@ -224,13 +229,40 @@ export class Calls {
         console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
     }
 
+    public async cleanUpToShip(): Promise<any> {
+        let orders = await base.loadJSONData("/result/to-ship.json");
+    
+        for (let x=0; x<orders.orders.length; x++) {
+            const date = new Date(orders.orders[x].order_date* 1e3).toLocaleDateString("en-US");
+                const dateNow = date.split(", ")[0].split("/").join("/");
+            
+            orders.orders[x].order_date = dateNow;
+            delete orders.orders[x].total;
+            delete orders.orders[x].shipping_fee;
+            delete orders.orders[x].total_plus_sf;
+            delete orders.orders[x].e_charges;
+            delete orders.orders[x].net;
+            const item_count = orders.orders[x].order_items.length;
+            for (let y=0; y<item_count; y++){
+                delete orders.orders[x].order_items[y]["price"];
+                delete orders.orders[x].order_items[y]["total"];
+                delete orders.orders[x].order_items[y]["charge"];
+            }
+        }
+        await fs.writeFile ("./result/to-ship.json", JSON.stringify(await orders,undefined,2), async function(err) {
+            if (err) throw err;
+                console.log('complete');
+            }
+        );
+    }
+
     public async deleteCancelled({ request, baseURL }): Promise<any> {
         let orders = await base.loadJSONData("/db/orders.json");
 
         const cancelled_list = await request.get(baseURL + "/api/v3/order/get_order_id_list?source=cancelled_all&page_number=1");
         let rspn = await JSON.parse(JSON.stringify(await cancelled_list.json()));
         
-        await fs.writeFile ("./db/x.json", JSON.stringify(await cancelled_list.json(),undefined,2), async function(err) {
+        await fs.writeFile ("./db/cancelled.json", JSON.stringify(await cancelled_list.json(),undefined,2), async function(err) {
             if (err) throw err;
                 console.log('complete');
             }
