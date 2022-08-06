@@ -28,7 +28,10 @@ export class Calls {
         let products = await base.loadJSONData("/stocks/products.json");
 
         do {
-            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
+            //PROCESSED ONLY
+            //const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
+            //ALL
+            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
             let rspn = await JSON.parse(JSON.stringify(await res_.json()));
             let infos = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": "PH", "shop_id": 271248938, order_date: x.order_create_time}));
             
@@ -59,7 +62,7 @@ export class Calls {
                                                     total: total = x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => y+total),
                                                     shipping_fee : Number(x.shipping_fee),
                                                     total_plus_sf : totalwsf = Number(x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => Number(y+total)) + Number(x.shipping_fee)),
-                                                    e_charges: totalcharges = Number(Number(totalwsf * 0.01).toFixed()) + 
+                                                    e_charges: totalcharges = Number(Number(totalwsf * 0.02).toFixed()) + 
                                                             Number(Number(totalwsf * 0.0224).toFixed()),
                                                     net : total - totalcharges,
                                                     //order_date: x,
@@ -69,11 +72,12 @@ export class Calls {
                                                     order_items: x.order_items.map((y) => ({
                                                         item_id : y.item_id,
                                                         model_id : y.model_id,
+                                                        item_name: "",
                                                         quantity: y.amount, 
                                                         price: Number(y.order_price),
                                                         total: Number(y.order_price) * y.amount,
                                                         charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed()),
-                                                        image: products[y.item_id][y.model_id]["image"]
+                                                        //image: products[y.item_id][y.model_id]["image"]
                                                     }))}));
                 combinedResponses = (combinedResponses + await JSON.stringify(await orders,undefined,2)).replace("\n][",",");
             }
@@ -82,18 +86,14 @@ export class Calls {
             //console.log(combinedResponses);
         } while (count <= pages);
 
-        await fs.writeFile ("./result/to-ship.json", await combinedResponses, async function(err) {
-            if (err) throw err;
-                console.log('complete');
-            }
-        );
+        await base.saveFile("./result/to-ship-total.json", await combinedResponses);
     }
 
     public async calcProfit(): Promise<any> {
         let products = await base.loadJSONData("/stocks/products.json");
         let data = [];
 
-        await base.loopJsonData ("/result/to-ship.json", "orders", async function(obj) {
+        await base.loopJsonData ("/result/to-ship-total.json", "orders", async function(obj) {
             const date = new Date(obj.order_date* 1e3).toLocaleDateString("en-US");
             const dateNow = date.split(", ")[0].split("/").join("/");
             
@@ -124,7 +124,7 @@ export class Calls {
                 // Items that need to be analyze because listing has a combined products: 3355461227 - Paperang+
                 } else if (item[x].item_id === 3355461227){
 
-                }        
+                }
             }
             
             data.push(await Object.assign(obj, {
@@ -136,8 +136,9 @@ export class Calls {
             }));
         });
         
-        const processed = base.processOrderBody(data);
-        let to_ship = JSON.stringify(await processed,undefined,2).replace(/\]\s*\]\s/, "]").replace(/\[\s*\[\s/, "[\n").replace(/\],\s*\[\s/, ",");
+        const processed = await base.processOrderBody(data);
+        // let to_ship = JSON.stringify(await processed,undefined,2).replace(/\]\s*\]\s/, "]").replace(/\[\s*\[\s/, "[\n").replace(/\],\s*\[\s/, ",");
+        let to_ship = JSON.stringify(processed,undefined,2);
         await fs.writeFile ("./result/to-ship-total.json", to_ship, async function(err) {
             if (err) throw err;
                 console.log('complete');
@@ -195,11 +196,7 @@ export class Calls {
             combinedRes = (await combinedRes + await stat).replace("\n}{","\n},\n{");
         }
 
-        await fs.writeFile ("./result/shipping-status.json", await combinedRes.replace("undefined","{ \"orders\" : [") + "\n]\n}", async function(err) {
-            if (err) { throw err }
-            console.log("complete");
-        }    
-        );
+        await base.saveFile("./result/shipping-status.json", await combinedRes.replace("undefined","{ \"orders\" : [") + "\n]\n}");
     }
 
     public async saveToDB(): Promise<any> {
@@ -220,40 +217,8 @@ export class Calls {
         const combined = Object.assign(current_details, {toAdd});
     
         let to_ship = JSON.stringify(await combined,undefined,2).replace(/\s\],\s\s*\"toAdd\": \[\s/, ",\n").replace("\n ,", ",");
-        await fs.writeFile ("./db/orders.json", to_ship.replace(/,\s*\"toAdd\": \[\]\s/, "\n"), async function(err) {
-            if (err) throw err;
-                console.log('complete');
-            }
-        );
-
+        await base.saveFile("./db/orders.json", to_ship.replace(/,\s*\"toAdd\": \[\]\s/, "\n"));
         console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
-    }
-
-    public async cleanUpToShip(): Promise<any> {
-        let orders = await base.loadJSONData("/result/to-ship.json");
-    
-        for (let x=0; x<orders.orders.length; x++) {
-            const date = new Date(orders.orders[x].order_date* 1e3).toLocaleDateString("en-US");
-                const dateNow = date.split(", ")[0].split("/").join("/");
-            
-            orders.orders[x].order_date = dateNow;
-            delete orders.orders[x].total;
-            delete orders.orders[x].shipping_fee;
-            delete orders.orders[x].total_plus_sf;
-            delete orders.orders[x].e_charges;
-            delete orders.orders[x].net;
-            const item_count = orders.orders[x].order_items.length;
-            for (let y=0; y<item_count; y++){
-                delete orders.orders[x].order_items[y]["price"];
-                delete orders.orders[x].order_items[y]["total"];
-                delete orders.orders[x].order_items[y]["charge"];
-            }
-        }
-        await fs.writeFile ("./result/to-ship.json", JSON.stringify(await orders,undefined,2), async function(err) {
-            if (err) throw err;
-                console.log('complete');
-            }
-        );
     }
 
     public async deleteCancelled({ request, baseURL }): Promise<any> {
@@ -261,13 +226,7 @@ export class Calls {
 
         const cancelled_list = await request.get(baseURL + "/api/v3/order/get_order_id_list?source=cancelled_all&page_number=1");
         let rspn = await JSON.parse(JSON.stringify(await cancelled_list.json()));
-        
-        await fs.writeFile ("./db/cancelled.json", JSON.stringify(await cancelled_list.json(),undefined,2), async function(err) {
-            if (err) throw err;
-                console.log('complete');
-            }
-        );
-
+        await base.saveFile("./db/cancelled.json", JSON.stringify(await cancelled_list.json(),undefined,2));
 
         const toDelete = rspn.data.orders.length;
         let indexes = new Set();
@@ -290,11 +249,7 @@ export class Calls {
         let new_orders = orders.orders.filter((x, i) => !indexes.has(i));
         new_orders = Object.assign({orders: new_orders});
         orders = JSON.stringify(new_orders,undefined,2);
-        await fs.writeFile ("./db/orders.json", orders, async function(err) {
-            if (err) throw err;
-                console.log('complete');
-            }
-        );
+        await base.saveFile("./db/orders.json", orders);
     }
 
     public async getAllCompleted({ request, baseURL }): Promise<any> {
@@ -325,11 +280,7 @@ export class Calls {
 
         const combined = Object.assign(completed, {toAdd});
         const updatedList = JSON.stringify(await combined,undefined,2).replace(/\s\],\s\s*\"toAdd\": \[\s/, ",\n").replace("\n ,", ",");
-        await fs.writeFile ("./db/s-completed.json", updatedList.replace(/,\s*\"toAdd\": \[\]\s/, "\n"), async function(err) {
-            if (err) throw err;
-                console.log('complete');
-            }
-        );
+        await base.saveFile("./db/s-completed.json", updatedList.replace(/,\s*\"toAdd\": \[\]\s/, "\n"));
         console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
     }
 
@@ -381,7 +332,7 @@ export class Calls {
                         // Find in the refund lists if there was a refund/return trasaction
                         let refund_detail = await refund.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id);
                         let new_e = expectedOrderCharges.orders[x].total - Number(refund_detail[0].refund_amount);
-                        const new_charges = Math.round(new_e * 0.0224) + Math.round(new_e * 0.01);
+                        const new_charges = Math.round(new_e * 0.0224) + Math.round(new_e * 0.02);
                         new_e = await new_e - new_charges;
                         const discrep = new_e - Number(result[0].amount);
                         totalDiscrp = totalDiscrp +discrep;
@@ -398,10 +349,11 @@ export class Calls {
             // DATA NOT FOUND
             }catch (e) {
                 let order_id;
+                let e_amount_missing;
                 if (await shipping.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id).length === 0 &&
                     await to_ship.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id).length === 0 &&
                     await refund.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id).length === 0) {
-                    combinedResponses.orders.push({status: "missing", order_id: expectedOrderCharges.orders[x].order_id, e_amount: expectedOrderCharges.orders[x].net});
+                    combinedResponses.orders.push({status: "missing", order_id: expectedOrderCharges.orders[x].order_id, missing_amount: expectedOrderCharges.orders[x].net});
                     ++count;
                     //console.log("\x1b[31m%s\x1b[0m","NOT FOUND: " + expectedOrderCharges.orders[x].order_id +" | MISSING: " + expectedOrderCharges.orders[x].net.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
                 }
@@ -413,7 +365,55 @@ export class Calls {
                 console.log('complete');
             }
         );
+        const info = await base.loadContent("/action_item/to-report.json");
+        const data =  await base.locateJSON(await info);
+        const missing = await base.pesoFormat(Number(await await data.orders.map(x => x.missing_amount).filter(item => !!item).reduce((acc, x) => x+acc, 0)));
+
         console.log("\x1b[31m%s\x1b[0m","TOTAL ITEMS WITH ISSUE: " + count);
-        console.log("\x1b[31m%s\x1b[0m","TOTAL MISSING AMOUNT: " + await base.pesoFormat(totalDiscrp));
+        console.log("\x1b[31m%s\x1b[0m","TOTAL DISCREPANCY AMOUNT: " + await base.pesoFormat(totalDiscrp));  
+        console.log("\x1b[31m%s\x1b[0m","TOTAL MISSING AMOUNT: " + missing);
+    }
+
+    public async getAllCompletedFromStart({ request, baseURL }): Promise<any> {
+        let completed = await base.loadJSONData("/db/s-completed.json");
+        let page = 1;
+        let found = false;
+        let toAdd = [];
+        let count = 0;
+        let totalPages;
+        //do {
+            const res = await request.get(baseURL + "/api/v3/finance/get_wallet_transactions/?SPC_CDS_VER=2&wallet_type=0&start_date=2020-06-06&end_date=2022-07-03&page_size=50&page_number="+page);
+            let response = await JSON.parse(JSON.stringify(await res.json()));
+            totalPages = response.data.page_info.total;
+            console.log(totalPages);
+            console.log(response.data.list.filter(z => z.order_sn).length);
+            for (let x = 0; x<response.data.list.length; x++) {
+                if(await completed.orders.filter(z => z.order_sn === response.data.list[x].order_sn).length === 0){
+                    ++count;
+                    const item = {"order_id": response.data.list[x].target_id, "order_sn" : response.data.list[x].order_sn, 
+                                "amount" : response.data.list[x].amount, "refund": 0, "transaction_id": response.data.list[x].transaction_id};
+                    toAdd.push(await item);
+                } else {
+                    found = true;
+                    break;
+                }
+            }
+
+            // page = found === false ? page+1: page;
+        // } while (found === false);
+
+        // const combined = Object.assign(completed, {toAdd});
+        // const updatedList = JSON.stringify(await combined,undefined,2).replace(/\s\],\s\s*\"toAdd\": \[\s/, ",\n").replace("\n ,", ",");
+        // await fs.writeFile ("./db/s-completed.json", updatedList.replace(/,\s*\"toAdd\": \[\]\s/, "\n"), async function(err) {
+        //     if (err) throw err;
+        //         console.log('complete');
+        //     }
+        // );
+        // console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
+        await fs.writeFile ("./db/all.json", JSON.stringify(await response,undefined,2), async function(err) {
+            if (err) throw err;
+                console.log('complete');
+            }
+        );
     }
 }

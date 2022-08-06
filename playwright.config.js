@@ -24,8 +24,8 @@ const config = {
       "cookie": cake,
       "authorization": ""
     },
-    setTimeout: 600000,
-    globalTimeout: 600000,
+    setTimeout: 6000000,
+    globalTimeout: 6000000,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
   },

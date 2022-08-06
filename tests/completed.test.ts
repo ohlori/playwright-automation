@@ -20,3 +20,8 @@ test("Validate the completed vs the expected", async () => {
     test.setTimeout(0);
     await call.auditShopeeIncomeComp();
 })
+
+test.only("Get all COMPLETED", async ({ request, baseURL }) => {
+    test.setTimeout(0);
+    await call.getAllCompletedFromStart({ request, baseURL });
+})

@@ -28,7 +28,7 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     const info = await base.loadJSONData("/db/orders.json");
     
     /*                UPDATE THE DATE AND MONTH!!       */
-    let month = 4;
+    let month = 8;
     let day = 1; //First entry is 02/18
    /****************************************************/
     console.log("-------------------------------------------");
@@ -67,9 +67,5 @@ test.skip("Test", async () => {
     
     const processed = base.processOrderBody(data);
     let to_ship = JSON.stringify(await processed,undefined,2).replace(/\]\s*\]\s/, "]").replace(/\[\s*\[\s/, "[\n").replace(/\],\s*\[\s/, ",");
-    await fs.writeFile ("./db/orders3.json", to_ship, async function(err) {
-        if (err) throw err;
-            console.log('complete');
-        }
-    );
+    base.saveFile("./db/orders3.json", to_ship);
 })

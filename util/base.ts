@@ -82,4 +82,11 @@ export class Base {
         let formatted = "₱ " + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         return formatted;
     }
+
+    public async saveFile(outputDir: any, data: any)  {
+        await fs.writeFile(outputDir, data, async function(err) {
+            if (err) throw err;
+            }
+        );
+    }
 }
