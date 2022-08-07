@@ -1,1 +1,1 @@
-# Personal project to learn api automation
+# Personal project to learn API automation using Playwright with Typescript
