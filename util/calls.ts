@@ -46,58 +46,61 @@ export class Calls {
                 
                 // Get only the order_ids that are NOT listed in the to-ship-total.json
                 currentToAddDetails = toShipDetails.filter(el => (-1 == to_ship_ids.indexOf(el.order_id)));
-                if(currentToAddDetails.length===0){
-                    break;
+                
+                // Check how many pages is the To Ship tab
+                if (count===1) {
+                    pages = rspn.data.total/40;
+                    pages = (rspn.data.total % 40) !== 0 ? Math.trunc(pages)+1 : Math.trunc(pages);
                 }
                 
-                // Prepare body --- slice the response into 10 (this is the only allowable # of data per call)
-                let resArray=[];
-                for (let i = 0, j = currentToAddDetails.length; i < j; i += 10) {
-                    resArray.push(currentToAddDetails.slice(i, i + 10));
+                if(currentToAddDetails.length!==0){
+                    // Prepare body --- slice the response into 10 (this is the only allowable # of data per call)
+                    let resArray=[];
+                    for (let i = 0, j = currentToAddDetails.length; i < j; i += 10) {
+                        resArray.push(currentToAddDetails.slice(i, i + 10));
+                    }
+
+                    // get all the details
+                    let info, orders;
+                    for (let x = 0; x<resArray.length; x++) {
+                        const viewData = await base.processOrderBody(resArray[x]);
+                        const resDetails = await request.post(baseURL + "/api/v3/order/get_shipment_order_list_by_order_ids_multi_shop", {
+                            data: viewData
+                        });
+
+                        let total, totalwsf, totalcharges ;
+                        info = await JSON.parse(JSON.stringify(await resDetails.json()));
+                        orders = await info.data.orders.map((x) => ({order_id : x.order_id, order_sn : x.order_sn,
+                            tracking_num: String(rspn.data.package_list.filter(j => j.order_sn === x.order_sn).map(k => k.third_party_tn)).replace("[", "").replace("]", ""),
+                                                            order_date: toShipDetails.filter(z => z.order_id === x.order_id)[0].order_date,
+                                                            total: total = x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => y+total),
+                                                            shipping_fee : Number(x.shipping_fee),
+                                                            total_plus_sf : totalwsf = Number(x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => Number(y+total)) + Number(x.shipping_fee)),
+                                                            e_charges: totalcharges = Number(Number(totalwsf * 0.02).toFixed()) + 
+                                                                    Number(Number(totalwsf * 0.0224).toFixed()),
+                                                            net : total - totalcharges,
+                                                            buyer_username: x.buyer_user.user_name, buyer_name : x.buyer_address_name, 
+                                                            items_count : Object.keys(x.order_items).length,
+                                                            order_items: x.order_items.map((y) => ({
+                                                                item_id : y.item_id,
+                                                                model_id : y.model_id,
+                                                                item_name: "",
+                                                                quantity: y.amount, 
+                                                                price: Number(y.order_price),
+                                                                total: Number(y.order_price) * y.amount,
+                                                                charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed()),
+                                                                //image: products[y.item_id][y.model_id]["image"]
+                                                            }))}));
+                        combinedResponses = (combinedResponses + await JSON.stringify(await orders,undefined,2)).replace("\n][",",");
+                    }
+                    combinedResponses = await combinedResponses.replace("]}[", ",").replace("undefined", "");
                 }
-
-                // Check how many pages is the To Ship tab
-                pages = rspn.data.total/40;
-                pages = (pages % 1) !== 0 ? Math.trunc(pages)+1 : Math.trunc(pages);
-
-                // get all the details
-                let info, orders;
-                for (let x = 0; x<resArray.length; x++) {
-                    const viewData = await base.processOrderBody(resArray[x]);
-                    const resDetails = await request.post(baseURL + "/api/v3/order/get_shipment_order_list_by_order_ids_multi_shop", {
-                        data: viewData
-                    });
-
-                    let total, totalwsf, totalcharges ;
-                    info = await JSON.parse(JSON.stringify(await resDetails.json()));
-                    orders = await info.data.orders.map((x) => ({order_id : x.order_id, order_sn : x.order_sn,
-                        tracking_num: String(rspn.data.package_list.filter(j => j.order_sn === x.order_sn).map(k => k.third_party_tn)).replace("[", "").replace("]", ""),
-                                                        order_date: toShipDetails.filter(z => z.order_id === x.order_id)[0].order_date,
-                                                        total: total = x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => y+total),
-                                                        shipping_fee : Number(x.shipping_fee),
-                                                        total_plus_sf : totalwsf = Number(x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => Number(y+total)) + Number(x.shipping_fee)),
-                                                        e_charges: totalcharges = Number(Number(totalwsf * 0.02).toFixed()) + 
-                                                                Number(Number(totalwsf * 0.0224).toFixed()),
-                                                        net : total - totalcharges,
-                                                        buyer_username: x.buyer_user.user_name, buyer_name : x.buyer_address_name, 
-                                                        items_count : Object.keys(x.order_items).length,
-                                                        order_items: x.order_items.map((y) => ({
-                                                            item_id : y.item_id,
-                                                            model_id : y.model_id,
-                                                            item_name: "",
-                                                            quantity: y.amount, 
-                                                            price: Number(y.order_price),
-                                                            total: Number(y.order_price) * y.amount,
-                                                            charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed()),
-                                                            //image: products[y.item_id][y.model_id]["image"]
-                                                        }))}));
-                    combinedResponses = (combinedResponses + await JSON.stringify(await orders,undefined,2)).replace("\n][",",");
-                }
-                combinedResponses = await combinedResponses.replace("]}[", ",").replace("undefined", "");
+                
                 ++count;
-            } while (count <= pages);
+                // console.log(pages);
+            } while (await count <= pages);
 
-            if (currentToAddDetails.length!==0){
+            if (combinedResponses!==undefined){
                 //Remove the shipped items (by removing orders that are not anymore listed on the To Ship tab)
                 const removeOutdated = await to_ship.orders.filter((i) => allToShipOrderIds.has(i.order_id));
 
@@ -164,7 +167,6 @@ export class Calls {
         });
 
         const processed = await base.processOrderBody(data);
-        // let to_ship = JSON.stringify(await processed,undefined,2).replace(/\]\s*\]\s/, "]").replace(/\[\s*\[\s/, "[\n").replace(/\],\s*\[\s/, ",");
         let to_ship = JSON.stringify(processed,undefined,2);
         await fs.writeFile ("./result/to-ship-total.json", to_ship, async function(err) {
             if (err) throw err;

@@ -19,7 +19,7 @@
     "20412854447" : {
         "136070437535" : {
             "name" : "10 years",
-            "cost" : 25,
+            "cost" : 26,
             "image" : "6a96c5e2509e35ee481a91d5fea74d29"
         }
     },
@@ -41,12 +41,12 @@
         "name" : "Generic Colored",
         "142181247155" : {
             "name" : "Generic Colored Paper",
-            "cost" : 21.66,
+            "cost" : 36.90,
             "image" : "6929fe59796c2e48f9a28d11c14e303a"
         },
         "142181247156" : {
             "name" : "Generic Colored Sticker",
-            "cost" : 44.22,
+            "cost" : 45.20,
             "image" : "50aeb79ea599e2260718b9e7ece207b4"
         }     
     },
@@ -59,7 +59,7 @@
         },
         "22248874340" :{
             "name": "Paperang Thermal Sticker (5yrs)",
-            "cost" : 143.09,
+            "cost" : 181.39,
             "image" : "8da2caa9d49df9d2a4ec06c4e4ab0f8f"
         },
         "87169126766" :{
@@ -71,14 +71,14 @@
     "12712978392" : {
         "57336652008" : {
             "name" : "Blue Ink Thermal Paper",
-            "cost" : 61.32,
+            "cost" : 61.47,
             "image" : "906f26b33b0451e4ecd4bfb2d8d8a8af"
         }
     },
     "12612977930" : {
         "120586658572" : {
             "name" : "Pink Ink Thermal Paper",
-            "cost" : 145.78,
+            "cost" : 147.76,
             "image" : "9255b056302ab2c2395825263104ccd8"
         }
     },
@@ -97,7 +97,7 @@
     "3589210800" : {
         "82088587588" : {
             "name" : "Generic Thermal Sticker for Paperang P3",
-            "cost" : 54.29,
+            "cost" : 78.08,
             "image" : "d93823c3c273a7fe9b62e2b01ed2ac52"
         }
     },
@@ -172,13 +172,13 @@
         "57364578721" :{
             "q" : 3,
             "name" : "3 packs of Colored Stickers",
-            "cost" : 132.66,
+            "cost" : 135.48,
             "image" : "50aeb79ea599e2260718b9e7ece207b4"
         },
         "57906889811" :{
             "q" : 4,
             "name" : "4 packs of Generic Thermal Stickers",
-            "cost" : 120.08,
+            "cost" : 122.4,
             "image" : "bc5985233599456c730b44c88ecf52bc"
         },
         "58018103429" :{
@@ -190,7 +190,7 @@
         "58018103430" :{
             "q" : 1,
             "name" : "Paperang Thermal Sticker (5yrs)",
-            "cost" : 143.09,
+            "cost" : 181.19,
             "image" : "8da2caa9d49df9d2a4ec06c4e4ab0f8f"
         },
         "82089426715" :{
@@ -208,25 +208,25 @@
         "84426191949" :{
             "q" : 3,
             "name" : "3 packs of Colored Thermal Papers",
-            "cost" : 64.98,
+            "cost" : 110.4,
             "image" : "6929fe59796c2e48f9a28d11c14e303a"
         },
         "104102625305" :{
             "q" : 2,
             "name" : "Blue Ink Thermal Paper",
-            "cost" : 116.2,
+            "cost" : 122.84,
             "image" : "906f26b33b0451e4ecd4bfb2d8d8a8af"
         },
         "104102625306" :{
             "q" : 1,
             "name" : "Pink Ink Thermal Paper",
-            "cost" : 145.78,
+            "cost" : 147.76,
             "image" : "9255b056302ab2c2395825263104ccd8"
         },
         "122547630356" :{
             "q" : 4,
             "name" : "2 packs of Colored Thermal Paper, 1 Generic Thermal Sticker, 1 Colored Sticker",
-            "cost" : 117.56,
+            "cost" : 149.36,
             "image" : "506541477167f829d3364c22a4c1d412"
         },
         "150290440630" :{
@@ -247,13 +247,13 @@
         "86844706026" :{
             "q" : 3,
             "name" : "3 packs of Colored Stickers",
-            "cost" : 132.66,
+            "cost" : 135.48,
             "image" : "50aeb79ea599e2260718b9e7ece207b4"
         },
         "86844706027" :{
             "q" : 4,
             "name" : "4 packs of Generic Thermal Stickers",
-            "cost" : 120.08,
+            "cost" : 122.4,
             "image" : "bc5985233599456c730b44c88ecf52bc"
         },
         "86844706022" :{
@@ -265,7 +265,7 @@
         "86844706029" :{
             "q" : 1,
             "name" : "Paperang Thermal Sticker (5yrs)",
-            "cost" : 143.09,
+            "cost" : 181.39,
             "image" : "8da2caa9d49df9d2a4ec06c4e4ab0f8f"
         },
         "86844706023" :{
@@ -283,25 +283,25 @@
         "86844706025" :{
             "q" : 3,
             "name" : "3 packs of Colored Thermal Papers",
-            "cost" : 64.98,
+            "cost" : 110.4,
             "image" : "6929fe59796c2e48f9a28d11c14e303a"
         },
         "86844706021" :{
             "q" : 2,
             "name" : "Blue Ink Thermal Paper",
-            "cost" : 116.2,
+            "cost" : 122.84,
             "image" : "906f26b33b0451e4ecd4bfb2d8d8a8af"
         },
         "86844706028" :{
             "q" : 1,
             "name" : "Pink Ink Thermal Paper",
-            "cost" : 145.78,
+            "cost" : 147.86,
             "image" : "9255b056302ab2c2395825263104ccd8"
         },
         "86844706024" :{
             "q" : 4,
             "name" : "2 packs of Colored Thermal Paper, 1 Generic Thermal Sticker, 1 Colored Sticker",
-            "cost" : 117.56,
+            "cost" : 149.36,
             "image" : "506541477167f829d3364c22a4c1d412"
         },
         "86844706030" :{
