@@ -23,70 +23,93 @@ export class Calls {
 
     //GOAL: Get all to-ship orders to automatically log it on the inventory to get the net incomes daily (uncollected)
     public async getAllToShip({ request, baseURL }): Promise<any> {
-        let count = 1;
-        let pages, combinedResponses;
-        let products = await base.loadJSONData("/stocks/products.json");
+        try{
+            let count = 1;
+            let toAdd=[];
+            let allToShipOrderIds=new Set();
+            let pages,combinedResponses;
+            let currentToAddDetails;
+            let products = await base.loadJSONData("/stocks/products.json");
+            const to_ship = await base.loadJSONData("/result/to-ship-total.json");
+            let to_ship_ids = to_ship.orders.map(x => x.order_id);
 
-        do {
-            //PROCESSED ONLY
-            //const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
-            //ALL
-            const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
-            let rspn = await JSON.parse(JSON.stringify(await res_.json()));
-            let infos = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": "PH", "shop_id": 271248938, order_date: x.order_create_time}));
-            
-            // slice the response into 10 (this is the only allowable # of data per call)
-            let j, resArray=[];
-            for (let i = 0, j = infos.length; i < j; i += 10) {
-                resArray.push(infos.slice(i, i + 10));
-            }
-
-            pages = rspn.data.total/40;
-            pages = (pages % 1) !== 0 ? Math.trunc(pages)+1 : Math.trunc(pages);
-
-            // get all the details
-            let info, orders;
-            for (let x = 0; x<resArray.length; x++) {
-                const viewData = await base.processOrderBody(resArray[x]);
-                const resDetails = await request.post(baseURL + "/api/v3/order/get_shipment_order_list_by_order_ids_multi_shop", {
-                    data: viewData
-                });
-
-
+            do {
+                //PROCESSED ONLY
+                //const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
+                //ALL
+                const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
+                let rspn = await JSON.parse(JSON.stringify(await res_.json()));
+                const toShipDetails = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": "PH", "shop_id": 271248938, order_date: x.order_create_time}));
                 
-                let total, totalwsf, totalcharges ;
-                info = await JSON.parse(JSON.stringify(await resDetails.json()));
-                orders = await info.data.orders.map((x) => ({order_id : x.order_id, order_sn : x.order_sn,
-                    tracking_num: String(rspn.data.package_list.filter(j => j.order_sn === x.order_sn).map(k => k.third_party_tn)).replace("[", "").replace("]", ""),
-                                                    order_date: infos.filter(z => z.order_id === x.order_id)[0].order_date,
-                                                    total: total = x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => y+total),
-                                                    shipping_fee : Number(x.shipping_fee),
-                                                    total_plus_sf : totalwsf = Number(x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => Number(y+total)) + Number(x.shipping_fee)),
-                                                    e_charges: totalcharges = Number(Number(totalwsf * 0.02).toFixed()) + 
-                                                            Number(Number(totalwsf * 0.0224).toFixed()),
-                                                    net : total - totalcharges,
-                                                    //order_date: x,
-                                                    // order_completed: x,
-                                                    buyer_username: x.buyer_user.user_name, buyer_name : x.buyer_address_name, 
-                                                    items_count : Object.keys(x.order_items).length,
-                                                    order_items: x.order_items.map((y) => ({
-                                                        item_id : y.item_id,
-                                                        model_id : y.model_id,
-                                                        item_name: "",
-                                                        quantity: y.amount, 
-                                                        price: Number(y.order_price),
-                                                        total: Number(y.order_price) * y.amount,
-                                                        charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed()),
-                                                        //image: products[y.item_id][y.model_id]["image"]
-                                                    }))}));
-                combinedResponses = (combinedResponses + await JSON.stringify(await orders,undefined,2)).replace("\n][",",");
-            }
-            combinedResponses = await combinedResponses.replace("]}[", ",").replace("undefined", "{ \"orders\":") + "}";
-            ++count;
-            //console.log(combinedResponses);
-        } while (count <= pages);
+                // Get all the order ids from To Ship tab to use later (remove ids from to-ship-total.json that are not anymore listed from the tab)
+                toShipDetails.forEach((x) => {allToShipOrderIds.add(x.order_id)});
+                
+                // Get only the order_ids that are NOT listed in the to-ship-total.json
+                currentToAddDetails = toShipDetails.filter(el => (-1 == to_ship_ids.indexOf(el.order_id)));
+                if(currentToAddDetails.length===0){
+                    break;
+                }
+                
+                // Prepare body --- slice the response into 10 (this is the only allowable # of data per call)
+                let resArray=[];
+                for (let i = 0, j = currentToAddDetails.length; i < j; i += 10) {
+                    resArray.push(currentToAddDetails.slice(i, i + 10));
+                }
 
-        await base.saveFile("./result/to-ship-total.json", await combinedResponses);
+                // Check how many pages is the To Ship tab
+                pages = rspn.data.total/40;
+                pages = (pages % 1) !== 0 ? Math.trunc(pages)+1 : Math.trunc(pages);
+
+                // get all the details
+                let info, orders;
+                for (let x = 0; x<resArray.length; x++) {
+                    const viewData = await base.processOrderBody(resArray[x]);
+                    const resDetails = await request.post(baseURL + "/api/v3/order/get_shipment_order_list_by_order_ids_multi_shop", {
+                        data: viewData
+                    });
+
+                    let total, totalwsf, totalcharges ;
+                    info = await JSON.parse(JSON.stringify(await resDetails.json()));
+                    orders = await info.data.orders.map((x) => ({order_id : x.order_id, order_sn : x.order_sn,
+                        tracking_num: String(rspn.data.package_list.filter(j => j.order_sn === x.order_sn).map(k => k.third_party_tn)).replace("[", "").replace("]", ""),
+                                                        order_date: toShipDetails.filter(z => z.order_id === x.order_id)[0].order_date,
+                                                        total: total = x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => y+total),
+                                                        shipping_fee : Number(x.shipping_fee),
+                                                        total_plus_sf : totalwsf = Number(x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => Number(y+total)) + Number(x.shipping_fee)),
+                                                        e_charges: totalcharges = Number(Number(totalwsf * 0.02).toFixed()) + 
+                                                                Number(Number(totalwsf * 0.0224).toFixed()),
+                                                        net : total - totalcharges,
+                                                        buyer_username: x.buyer_user.user_name, buyer_name : x.buyer_address_name, 
+                                                        items_count : Object.keys(x.order_items).length,
+                                                        order_items: x.order_items.map((y) => ({
+                                                            item_id : y.item_id,
+                                                            model_id : y.model_id,
+                                                            item_name: "",
+                                                            quantity: y.amount, 
+                                                            price: Number(y.order_price),
+                                                            total: Number(y.order_price) * y.amount,
+                                                            charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed()),
+                                                            //image: products[y.item_id][y.model_id]["image"]
+                                                        }))}));
+                    combinedResponses = (combinedResponses + await JSON.stringify(await orders,undefined,2)).replace("\n][",",");
+                }
+                combinedResponses = await combinedResponses.replace("]}[", ",").replace("undefined", "");
+                ++count;
+            } while (count <= pages);
+
+            if (currentToAddDetails.length!==0){
+                //Remove the shipped items (by removing orders that are not anymore listed on the To Ship tab)
+                const removeOutdated = await to_ship.orders.filter((i) => allToShipOrderIds.has(i.order_id));
+
+                combinedResponses = JSON.parse(combinedResponses);
+                let updatedToShip = removeOutdated.concat(combinedResponses);
+            
+                await base.saveFile("./result/to-ship-total.json", JSON.stringify(await updatedToShip, undefined, 2).replace("\n]", "]}").replace("[\n","{ \"orders\": ["));
+            }
+            console.log("\x1b[32m%s\x1b[0m","\t[to-ship] ADDED ITEMS: " + currentToAddDetails.length);
+        } catch(e) {
+            console.error(e)
+        }
     }
 
     public async calcProfit(): Promise<any> {
@@ -96,46 +119,50 @@ export class Calls {
         await base.loopJsonData ("/result/to-ship-total.json", "orders", async function(obj) {
             const date = new Date(obj.order_date* 1e3).toLocaleDateString("en-US");
             const dateNow = date.split(", ")[0].split("/").join("/");
-            
+
             let total=0, resArray={};
             const item = obj.order_items;
-            for (let x = 0; x<item.length; x++) {
-                let currentCost;
-                // Excluding piso print, waybill printer, comb binding, japanese from zero, korean from zero, harrison's
-                if (item[x].item_id !== 5466601122 && item[x].item_id !== 9796544496 && item[x].item_id !== 13266021243 &&
-                    item[x].item_id !== 10823437701 && item[x].item_id !== 8248315539 && item[x].item_id !== 7277574568 ) {
-                    //Check if ITEM ID is in the products db
-                    try {
-                        await products[item[x].item_id]
-                    }catch (error) {
-                        console.log ("[ORDER ID: " +obj.order_sn+ "] Missing ITEM ID: " + item[x].item_id);
-                    }
+            if ((!Object.prototype.hasOwnProperty.call(obj, "profit"))){
+                for (let x = 0; x<item.length; x++) {
+                    let currentCost;
+                    // Excluding piso print, waybill printer, comb binding, japanese from zero, korean from zero, harrison's
+                    if (item[x].item_id !== 5466601122 && item[x].item_id !== 9796544496 && item[x].item_id !== 13266021243 &&
+                        item[x].item_id !== 10823437701 && item[x].item_id !== 8248315539 && item[x].item_id !== 7277574568 ) {
+                        //Check if ITEM ID is in the products db
+                        try {
+                            await products[item[x].item_id]
+                        }catch (error) {
+                            console.log ("[ORDER ID: " +obj.order_sn+ "] Missing ITEM ID: " + item[x].item_id);
+                        }
 
-                    //Check if MODEL ID is in the products db
-                    try {
-                        await products[item[x].item_id][item[x].model_id]["cost"];
-                    }catch (error) {
-                        console.log ("[ORDER ID: " +obj.order_sn+ " | ITEM ID: " +item[x].item_id+ "] Missing MODEL ID: " + item[x].model_id);
-                    }
-                    currentCost = products[item[x].item_id][item[x].model_id]["cost"] * item[x].quantity;
-                    const netprof = (item[x].total - item[x].charge) - currentCost;
-                    total = total + netprof;
-                    resArray[item[x].model_id] = Number(netprof.toFixed(2));
-                // Items that need to be analyze because listing has a combined products: 3355461227 - Paperang+
-                } else if (item[x].item_id === 3355461227){
+                        //Check if MODEL ID is in the products db
+                        try {
+                            await products[item[x].item_id][item[x].model_id]["cost"];
+                        }catch (error) {
+                            console.log ("[ORDER ID: " +obj.order_sn+ " | ITEM ID: " +item[x].item_id+ "] Missing MODEL ID: " + item[x].model_id);
+                        }
+                        currentCost = products[item[x].item_id][item[x].model_id]["cost"] * item[x].quantity;
+                        const netprof = (item[x].total - item[x].charge) - currentCost;
+                        total = total + netprof;
+                        resArray[item[x].model_id] = Number(netprof.toFixed(2));
+                    // Items that need to be analyze because listing has a combined products: 3355461227 - Paperang+
+                    } else if (item[x].item_id === 3355461227){
 
+                    }
                 }
+
+                data.push(await Object.assign(obj, {
+                    order_date : 0+dateNow,
+                    profit: {
+                        total: Number(total.toFixed(2)),
+                        ...resArray
+                    } 
+                }));
+            } else {
+                data.push(await Object.assign(obj));
             }
-            
-            data.push(await Object.assign(obj, {
-                order_date : 0+dateNow,
-                profit: {
-                    total: Number(total.toFixed(2)),
-                    ...resArray
-                } 
-            }));
         });
-        
+
         const processed = await base.processOrderBody(data);
         // let to_ship = JSON.stringify(await processed,undefined,2).replace(/\]\s*\]\s/, "]").replace(/\[\s*\[\s/, "[\n").replace(/\],\s*\[\s/, ",");
         let to_ship = JSON.stringify(processed,undefined,2);
@@ -144,7 +171,7 @@ export class Calls {
                 console.log('complete');
             }
         );
-    }
+}
 
     public async getShippingStat({ request, baseURL }): Promise<any> {
         let count = 1;
@@ -218,7 +245,7 @@ export class Calls {
     
         let to_ship = JSON.stringify(await combined,undefined,2).replace(/\s\],\s\s*\"toAdd\": \[\s/, ",\n").replace("\n ,", ",");
         await base.saveFile("./db/orders.json", to_ship.replace(/,\s*\"toAdd\": \[\]\s/, "\n"));
-        console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
+        console.log("\x1b[32m%s\x1b[0m","\t[db] ADDED ITEMS: " + count);
     }
 
     public async deleteCancelled({ request, baseURL }): Promise<any> {
