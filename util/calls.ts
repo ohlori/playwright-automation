@@ -103,8 +103,8 @@ export class Calls {
             if (combinedResponses!==undefined){
                 //Remove the shipped items (by removing orders that are not anymore listed on the To Ship tab)
                 const removeOutdated = await to_ship.orders.filter((i) => allToShipOrderIds.has(i.order_id));
-
                 combinedResponses = JSON.parse(combinedResponses);
+                //Combining new orders + current to ship orders from To Ship tab
                 let updatedToShip = removeOutdated.concat(combinedResponses);
             
                 await base.saveFile("./result/to-ship-total.json", JSON.stringify(await updatedToShip, undefined, 2).replace("\n]", "]}").replace("[\n","{ \"orders\": ["));
@@ -311,6 +311,7 @@ export class Calls {
         const updatedList = JSON.stringify(await combined,undefined,2).replace(/\s\],\s\s*\"toAdd\": \[\s/, ",\n").replace("\n ,", ",");
         await base.saveFile("./db/s-completed.json", updatedList.replace(/,\s*\"toAdd\": \[\]\s/, "\n"));
         console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
+        return await count > 0;
     }
 
     public async getAllRefund({ request, baseURL }): Promise<any> {
