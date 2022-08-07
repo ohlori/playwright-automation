@@ -6,16 +6,21 @@ var fs = require("fs/promises");
 const base = new Base();
 const call = new Calls();
 let total=0;
+let status_change = false;
 
 test("Get all COMPLETED transaction items with amount", async ({ request, baseURL }) => {
     test.setTimeout(0);
-    await call.getAllCompleted({ request, baseURL });
+    status_change = await call.getAllCompleted({ request, baseURL });
 })
 
-test("Get SHIPPPING status", async ({ request, baseURL }) => {
-    test.setTimeout(0);
-    await call.getShippingStat({ request, baseURL });
-})
+if (status_change){
+    test("Get SHIPPPING status", async ({ request, baseURL }) => {
+        test.setTimeout(0);
+        await call.getShippingStat({ request, baseURL });
+    });
+} else {
+    test("No status change", async () => {});
+}
 
 test("Shipping Status Summary", async ({ request, baseURL }) => {
     const info = await base.loadContent("/result/shipping-status.json");

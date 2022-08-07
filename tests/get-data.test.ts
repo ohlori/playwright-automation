@@ -32,3 +32,6 @@ test("DAILY NET REPORT", async () => {
     console.log("Daily Net Profit: " + await base.pesoFormat(Number(await await data.orders.map(x => x.profit.total).reduce((acc, x) => x+acc, 0))));
 })
 
+test.skip("SAMPLE SKIP", async () => {
+})
+
