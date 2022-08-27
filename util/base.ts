@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import { checkPrimeSync } from "crypto";
 import { join } from "path";
 const normalizer = require("path");
 
@@ -81,6 +80,12 @@ export class Base {
     public pesoFormat(amount: any): string {
         let formatted = "₱ " + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         return formatted;
+    }
+
+    public getDateFromEpoch(epoch: any): any {
+        const date = new Date(epoch* 1e3).toLocaleDateString("en-US");
+        const dateNow = date.split(", ")[0].split("/").join("/");
+        return dateNow;
     }
 
     public async saveFile(outputDir: any, data: any)  {

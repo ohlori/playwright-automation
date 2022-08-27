@@ -1,7 +1,10 @@
 import { Base } from '../util/base';
+import { Reuse } from '../util/reuse';
+import { global } from "../global";
 var fs = require("fs/promises");
 
 const base = new Base();
+const reuse = new Reuse();
 
 
 export class Calls {
@@ -35,13 +38,14 @@ export class Calls {
 
             do {
                 //PROCESSED ONLY
-                //const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
+                const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?source=processed&page_number="+count);
                 //ALL
-                const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
+                // const res_ = await request.get(baseURL + "/api/v3/order/get_package_list?page_number="+count);
                 let rspn = await JSON.parse(JSON.stringify(await res_.json()));
-                const toShipDetails = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": "PH", "shop_id": 271248938, order_date: x.order_create_time}));
+                const toShipDetails = await rspn.data.package_list.map((x) => ({"order_id": x.order_id, "region_id": global.region_id, "shop_id": global.shop_id,
+                                                                                     order_date: x.order_create_time}));
                 
-                // Get all the order ids from To Ship tab to use later (remove ids from to-ship-total.json that are not anymore listed from the tab)
+                // Get all the order ids from To Ship tab to use later (to remove ids from to-ship-total.json that are not anymore listed from the tab)
                 toShipDetails.forEach((x) => {allToShipOrderIds.add(x.order_id)});
                 
                 // Get only the order_ids that are NOT listed in the to-ship-total.json
@@ -62,38 +66,7 @@ export class Calls {
 
                     // get all the details
                     let info, orders;
-                    for (let x = 0; x<resArray.length; x++) {
-                        const viewData = await base.processOrderBody(resArray[x]);
-                        const resDetails = await request.post(baseURL + "/api/v3/order/get_shipment_order_list_by_order_ids_multi_shop", {
-                            data: viewData
-                        });
-
-                        let total, totalwsf, totalcharges ;
-                        info = await JSON.parse(JSON.stringify(await resDetails.json()));
-                        orders = await info.data.orders.map((x) => ({order_id : x.order_id, order_sn : x.order_sn,
-                            tracking_num: String(rspn.data.package_list.filter(j => j.order_sn === x.order_sn).map(k => k.third_party_tn)).replace("[", "").replace("]", ""),
-                                                            order_date: toShipDetails.filter(z => z.order_id === x.order_id)[0].order_date,
-                                                            total: total = x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => y+total),
-                                                            shipping_fee : Number(x.shipping_fee),
-                                                            total_plus_sf : totalwsf = Number(x.order_items.map(y =>  Number(y.order_price) * y.amount).reduce((total, y) => Number(y+total)) + Number(x.shipping_fee)),
-                                                            e_charges: totalcharges = Number(Number(totalwsf * 0.02).toFixed()) + 
-                                                                    Number(Number(totalwsf * 0.0224).toFixed()),
-                                                            net : total - totalcharges,
-                                                            buyer_username: x.buyer_user.user_name, buyer_name : x.buyer_address_name, 
-                                                            items_count : Object.keys(x.order_items).length,
-                                                            order_items: x.order_items.map((y) => ({
-                                                                item_id : y.item_id,
-                                                                model_id : y.model_id,
-                                                                item_name: "",
-                                                                quantity: y.amount, 
-                                                                price: Number(y.order_price),
-                                                                total: Number(y.order_price) * y.amount,
-                                                                charge: Number(((((y.order_price) * y.amount) / Number(total))* totalcharges).toFixed()),
-                                                                //image: products[y.item_id][y.model_id]["image"]
-                                                            }))}));
-                        combinedResponses = (combinedResponses + await JSON.stringify(await orders,undefined,2)).replace("\n][",",");
-                    }
-                    combinedResponses = await combinedResponses.replace("]}[", ",").replace("undefined", "");
+                    combinedResponses = await reuse.getOrderDetails({ request, baseURL }, resArray, rspn.data.package_list, toShipDetails);
                 }
                 
                 ++count;
@@ -120,8 +93,8 @@ export class Calls {
         let data = [];
 
         await base.loopJsonData ("/result/to-ship-total.json", "orders", async function(obj) {
-            const date = new Date(obj.order_date* 1e3).toLocaleDateString("en-US");
-            const dateNow = date.split(", ")[0].split("/").join("/");
+            let dateNow = base.getDateFromEpoch(obj.order_date);
+
 
             let total=0, resArray={};
             const item = obj.order_items;
@@ -213,7 +186,14 @@ export class Calls {
 
             const getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + String(current_val));
             let stat = await JSON.parse(JSON.stringify(await getShippingStatus.json()));
-            stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "courier" : x.thirdparty_tracking_number, "status": x.status, "status2" : x.channel_status,
+
+            const epoch = stat.data.list[0].ctime;
+            const dateNow = base.getDateFromEpoch(epoch);
+
+            stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "order_sn": x.order_sn,
+                                "third_party_tn" : x.thirdparty_tracking_number,
+                                "order_date": dateNow,
+                                "status": x.status, "status2" : x.channel_status,
                                 "subtotal" : info.data.payment_info.merchant_subtotal.product_price,
                                 "shipping_fee": info.data.buyer_payment_info.shipping_fee,
                                 "charges": Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee),
@@ -226,6 +206,38 @@ export class Calls {
         }
 
         await base.saveFile("./result/shipping-status.json", await combinedRes.replace("undefined","{ \"orders\" : [") + "\n]\n}");
+    }
+
+    public async saveMissingOrdersInDB({ request, baseURL }): Promise<any> {
+        let current_details = await base.loadJSONData("/db/orders.json");
+        let inShipping = await base.loadJSONData("/result/shipping-status.json");
+        const inShippingCount = inShipping.orders.length;
+        let missing = []; 
+
+        for (let i=0; i<inShippingCount; i++) {
+            if (await current_details.orders.filter(x => x.order_id === inShipping.orders[i].order_id).length === 0) {
+                // console.log(inShipping.orders[i].order_id + " not found!");
+                missing.push({"order_id": inShipping.orders[i].order_id, "region_id": global.region_id, "shop_id": global.shop_id});
+            }
+        }
+
+        if (missing.length>0) {
+            // Prepare body --- slice the response into 10 (this is the only allowable # of data per call)
+            let resArray=reuse.sliceTo10(await missing);
+
+            // get all the necessary details
+            let missing_details = await reuse.getOrderDetails({ request, baseURL }, resArray, inShipping.orders, inShipping.orders);
+            missing_details = missing_details.replace(/[\t\n\r]/gm, "");
+
+            const missingDetails = JSON.parse(missing_details)
+            const order_ids = missingDetails.map(x => x.order_id);
+            const combined = Object.assign(current_details, {missingDetails});
+
+            let to_ship = JSON.stringify(await combined,undefined,2).replace(/\s\],\s*\"missingDetails\": \[\s/, ",\n").replace("\n ,", ",");
+            await base.saveFile("./db/orders.json", to_ship.replace(/,\s*\"missingDetails\": \[\]\s/, "\n"));
+            console.log("\x1b[31m%s\x1b[0m","\t[MISSING: " + order_ids+"]");
+            console.log("\x1b[32m%s\x1b[0m","\t[db] ADDED ITEMS: " + order_ids.length);
+        }
     }
 
     public async saveToDB(): Promise<any> {
@@ -281,7 +293,7 @@ export class Calls {
         await base.saveFile("./db/orders.json", orders);
     }
 
-    public async getAllCompleted({ request, baseURL }): Promise<any> {
+    public async getAllCompleted({ request, baseURL }): Promise<boolean> {
         let completed = await base.loadJSONData("/db/s-completed.json");
         let page = 1;
         let found = false;
@@ -311,7 +323,8 @@ export class Calls {
         const updatedList = JSON.stringify(await combined,undefined,2).replace(/\s\],\s\s*\"toAdd\": \[\s/, ",\n").replace("\n ,", ",");
         await base.saveFile("./db/s-completed.json", updatedList.replace(/,\s*\"toAdd\": \[\]\s/, "\n"));
         console.log("\x1b[32m%s\x1b[0m","\tADDED ITEMS: " + count);
-        return await count > 0;
+        const change = await count > 0;
+        return change;
     }
 
     public async getAllRefund({ request, baseURL }): Promise<any> {
