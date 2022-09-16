@@ -39,8 +39,8 @@ test("Shipping Status Summary", async ({ request, baseURL }) => {
     console.log("---------------------------------------------------");
     console.log("\x1b[31m%s\x1b[0m","\t\t    RTS: " + rts_total_count + " | " +  await base.pesoFormat(Number(await rts_total)));
     console.log("---------------------------------------------------");
-    console.log("\tDelivered:   " + delivered_count + "\t\t" +  await base.pesoFormat(Number(delivered_total)));
-    console.log("\tIn-Progress: " + shipping_count +  "\t\t" + await base.pesoFormat(Number(shipping_total)));
+    console.log("\tDelivered:   " + delivered_count.toString().padEnd(11) +  await base.pesoFormat(Number(delivered_total)));
+    console.log("\tIn-Progress: " + shipping_count.toString().padEnd(11) + await base.pesoFormat(Number(shipping_total)));
     console.log("---------------------------------------------------");
     total = Number(Number(delivered_total) + Number(shipping_total));
     console.log("\x1b[33m%s\x1b[0m","\tShipping Total        : " + await base.pesoFormat(total));

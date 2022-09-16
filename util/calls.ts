@@ -50,6 +50,7 @@ export class Calls {
                 
                 // Get only the order_ids that are NOT listed in the to-ship-total.json
                 currentToAddDetails = toShipDetails.filter(el => (-1 == to_ship_ids.indexOf(el.order_id)));
+                //TO TEST: currentToAddDetails = toShipDetails.filter(el => (-1 == to_ship_ids.indexOf(el.order_id)) || (to_ship_ids.indexOf(el.order_id).map(k => k.tracking_num === "")));
                 
                 // Check how many pages is the To Ship tab
                 if (count===1) {
@@ -251,8 +252,13 @@ export class Calls {
             // If it does not exist on the order-details.json, add the details
             // console.log(await current_details.orders.filter(z => z.order_id === current_to_ship.orders[x].order_id).length);
             if(await current_details.orders.filter(z => z.order_id === current_to_ship.orders[x].order_id).length === 0){
-                ++count;
-                toAdd.push(await current_to_ship.orders[x]);
+                if (current_to_ship.orders[x].hasOwnProperty("profit")) {
+                    ++count;
+                    toAdd.push(await current_to_ship.orders[x]);
+                } else {
+                    console.log("\x1b[31m%s\x1b[0m","ORDER ID/S WITHOUT COMPUTED PROFIT: " +  current_to_ship.orders[x].order_id);
+
+                }
             }
         }
         const combined = Object.assign(current_details, {toAdd});
