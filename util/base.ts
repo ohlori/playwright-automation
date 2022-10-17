@@ -12,12 +12,18 @@ export class Base {
         return this.contentData;
     }
 
-    public loadContent(path: string) {
+    public async loadContent(path: string, returnData?: boolean) {
         try {
             const localPath = join(process.cwd(), path);
             this.contentPath = normalizer.normalize(localPath);
             this.contentData = JSON.parse(fs.readFileSync(this.contentPath, "utf8"));
-            return this.contentData;
+
+            if(returnData) {
+                const data = await this.locateJSON(await this.contentData);
+                return await data
+            } else {
+                return this.contentData;
+            }
         } catch (error) {
             console.log("ERROR: unable to read content file.");
         }
@@ -30,7 +36,7 @@ export class Base {
         return  data;
     }
 
-     public locateJSON(data: JSON, jsonStrc?: string) {
+    public locateJSON(data: JSON, jsonStrc?: string) {
         let loc: JSON = data;
         // split the received locator path in json with .
         let str;
@@ -43,8 +49,6 @@ export class Base {
         }
         return JSON.parse(JSON.stringify(loc,undefined,2));
     }
-
-    
 
     public async processOrderBody(infos: any): Promise <any> {    
         let viewData = { 

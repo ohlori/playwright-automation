@@ -51,7 +51,7 @@ export class Calls {
                 // Get only the order_ids that are NOT listed in the to-ship-total.json
                 currentToAddDetails = toShipDetails.filter(el => (-1 == to_ship_ids.indexOf(el.order_id)));
                 //TO TEST: currentToAddDetails = toShipDetails.filter(el => (-1 == to_ship_ids.indexOf(el.order_id)) || (to_ship_ids.indexOf(el.order_id).map(k => k.tracking_num === "")));
-                
+
                 // Check how many pages is the To Ship tab
                 if (count===1) {
                     pages = rspn.data.total/40;
@@ -87,6 +87,8 @@ export class Calls {
         } catch(e) {
             console.error(e)
         }
+        const allOrders = await base.loadContent("/result/to-ship-total.json", true);
+        console.log("\x1b[32m%s\x1b[0m","\tTOTAL TO SHIP: " + await allOrders.orders.filter(x => x.order_id).length);
     }
 
     public async calcProfit(): Promise<any> {
@@ -190,7 +192,7 @@ export class Calls {
 
             const epoch = stat.data.list[0].ctime;
             const dateNow = base.getDateFromEpoch(epoch);
-
+            // console.log(stat.data);
             stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "order_sn": x.order_sn,
                                 "third_party_tn" : x.thirdparty_tracking_number,
                                 "order_date": dateNow,
@@ -414,8 +416,7 @@ export class Calls {
                 console.log('complete');
             }
         );
-        const info = await base.loadContent("/action_item/to-report.json");
-        const data =  await base.locateJSON(await info);
+        const data = await base.loadContent("/action_item/to-report.json", true);
         const missing = await base.pesoFormat(Number(await await data.orders.map(x => x.missing_amount).filter(item => !!item).reduce((acc, x) => x+acc, 0)));
 
         console.log("\x1b[31m%s\x1b[0m","TOTAL ITEMS WITH ISSUE: " + count);
