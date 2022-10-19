@@ -7,7 +7,7 @@ const base = new Base();
 const call = new Calls();
 
 test("Get all TO SHIP items", async ({ request, baseURL }) => {
-    test.setTimeout(0);
+    test.setTimeout(12000000);
     await call.getAllToShip({ request, baseURL });
 })
 
@@ -20,7 +20,7 @@ test("Save to database", async () => {
 })
 
 test("Delete cancelled orders", async ({ request, baseURL }) => {
-    test.setTimeout(0);
+    test.setTimeout(12000000);
     await call.deleteCancelled({ request, baseURL });
 })
 

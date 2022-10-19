@@ -16,7 +16,7 @@ export class Base {
         try {
             const localPath = join(process.cwd(), path);
             this.contentPath = normalizer.normalize(localPath);
-            this.contentData = JSON.parse(fs.readFileSync(this.contentPath, "utf8"));
+            this.contentData = await JSON.parse(fs.readFileSync(this.contentPath, "utf8"));
 
             if(returnData) {
                 const data = await this.locateJSON(await this.contentData);
@@ -36,7 +36,7 @@ export class Base {
         return  data;
     }
 
-    public locateJSON(data: JSON, jsonStrc?: string) {
+    public async locateJSON(data: JSON, jsonStrc?: string) {
         let loc: JSON = data;
         // split the received locator path in json with .
         let str;
@@ -47,7 +47,7 @@ export class Base {
                 loc = loc[str[i]];
             }
         }
-        return JSON.parse(JSON.stringify(loc,undefined,2));
+        return await JSON.parse(JSON.stringify(loc,undefined,2));
     }
 
     public async processOrderBody(infos: any): Promise <any> {    
@@ -93,9 +93,12 @@ export class Base {
     }
 
     public async saveFile(outputDir: any, data: any)  {
-        await fs.writeFile(outputDir, data, async function(err) {
-            if (err) throw err;
-            }
-        );
+        return new Promise((resolve, reject) => {
+            fs.writeFile(outputDir, data, err => {
+                if (err) { reject(err); }
+                resolve(true);
+            })
+        });
+
     }
 }

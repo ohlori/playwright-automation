@@ -83,10 +83,12 @@ export class Calls {
             
                 await base.saveFile("./result/to-ship-total.json", JSON.stringify(await updatedToShip, undefined, 2).replace("\n]", "]}").replace("[\n","{ \"orders\": ["));
             }
-            console.log("\x1b[32m%s\x1b[0m","\t[to-ship] ADDED ITEMS: " + currentToAddDetails.length);
+
+            console.log("\x1b[32m%s\x1b[0m","\t[to-ship] ADDED ITEMS: " + await currentToAddDetails.length);
         } catch(e) {
             console.error(e)
         }
+
         const allOrders = await base.loadContent("/result/to-ship-total.json", true);
         console.log("\x1b[32m%s\x1b[0m","\tTOTAL TO SHIP: " + await allOrders.orders.filter(x => x.order_id).length);
     }
