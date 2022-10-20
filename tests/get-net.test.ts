@@ -15,7 +15,7 @@ test("NET PROFIT REPORT BY MONTH", async () => {
     console.log("-------------------------------------------");
     let total = 0;
     do {
-        const mon = month > 10 ? ""+month : "0"+month;4
+        const mon = month > 10 ? ""+month : "0"+month;
         total = await info.orders.filter(x => x.order_date.toString().includes(mon+"/")).map(x => x.profit.total).reduce((acc, x) => x+acc, 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         if (await total != 0) {
             console.log(month +": ₱" +  total);
@@ -28,8 +28,8 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     const info = await base.loadJSONData("/db/orders.json");
     
     /*                UPDATE THE DATE AND MONTH!!       */
-    let month = 8;
-    let day = 1; //First entry is 02/18
+    let month = 10;
+    let day = 1; //First entry is 02/18/2022
    /****************************************************/
     console.log("-------------------------------------------");
     console.log("             MONTHLY NET PROFIT            ");
@@ -40,18 +40,20 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     do {
         const mon = month > 10 ? ""+month : "0"+month;4
         subtotal = subtotal + Number(await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.profit.total).reduce((acc, x) => x+acc, 0));
-        gross = gross + Number(await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.net).reduce((acc, x) => x+acc, 0));
-        total = await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.profit.total).reduce((acc, x) => x+acc, 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        const currentGross = Number(await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.net).reduce((acc, x) => x+acc, 0));
+        gross = gross + currentGross;
+        total = await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.profit.total).reduce((acc, x) => x+acc, 0);
         if (await total != 0) {
-            console.log(month +"/" + day +": ₱" +  total);
+            // console.log(month +"/" + day +": " +  base.pesoFormat(total) + " | " + base.pesoFormat(currentGross) + " | " + ((total/currentGross)*100).toFixed(0) + "%");
+            console.log(month +"/" + String(day).padStart(2,"0") +": " +  base.pesoFormat(total) + " | " + ((total/currentGross)*100).toFixed(0) + "%");
         }
         ++day;
     } while (total != 0)
     console.log("-------------------------------------------");
-    console.log("             TOTAL  : ₱"+ subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") +"            ");
-    console.log("             AVERAGE: ₱"+ (subtotal/ (day-2)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") +"            ");
+    console.log("             TOTAL  : "+ base.pesoFormat(subtotal) +"            ");
+    console.log("             AVERAGE: "+ base.pesoFormat(subtotal/ (day-2)) +"            ");
     console.log("-------------------------------------------");
-    console.log("       MONTHLY GROSS : ₱"+ gross.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") +"            ");
+    console.log("       MONTHLY GROSS : "+ base.pesoFormat(gross) +"            ");
 })
 
 test.skip("Test", async () => {

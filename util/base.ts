@@ -82,7 +82,7 @@ export class Base {
     }
 
     public pesoFormat(amount: any): string {
-        let formatted = "₱ " + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        let formatted = "₱ " + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",").padStart(10, " ");
         return formatted;
     }
 
