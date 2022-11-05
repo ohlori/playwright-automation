@@ -12,7 +12,7 @@ test("Get all TO SHIP items", async ({ request, baseURL }) => {
 })
 
 test("Calculate the profit", async () => {
-    await call.calcProfit();
+    await call.calcProfit("./result/to-ship-total.json");
 })
 
 test("Save to database", async () => {
@@ -30,6 +30,7 @@ test("DAILY NET REPORT", async () => {
     console.log("Daily Net Profit: " + await base.pesoFormat(Number(await await data.orders.map(x => x.profit.total).reduce((acc, x) => x+acc, 0))));
 })
 
-test.skip("SAMPLE SKIP", async () => {
+test.skip("SAMPLE SKIP", async ({ request, baseURL }) => {
+    await call.getShippingDetailsFromToShip({ request, baseURL });
 })
 

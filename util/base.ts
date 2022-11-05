@@ -62,8 +62,8 @@ export class Base {
         return await viewData;
     }
 
-    public async loopJsonData(json, data, callback) {
-        const inputData = this.loadJSONData(json, data);
+    public async loopJsonDatafromJSON(json, data, callback) {
+        const inputData = await this.loadJSONData(json, data);
         const promises = [];
         await inputData.forEach((val, i) => {
             promises.push(callback(val, i, inputData));

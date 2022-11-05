@@ -1,6 +1,7 @@
 import { Base } from '../util/base';
 import { Reuse } from '../util/reuse';
 import { global } from "../global";
+import { callbackify } from 'util';
 var fs = require("fs/promises");
 
 const base = new Base();
@@ -16,7 +17,7 @@ export class Calls {
     * 3. Take note of the time, so it can be filtered by day to get the net income daily
     **/
     public async getCompleted({ request, baseURL }): Promise<any> {
-        const res_ = await request.get(baseURL + "/api/v3/order/get_order_id_list?source=completed&page_size=40&page_number=1");
+        const res_ = await request.get(baseURL + "/api/v3/order/get_order_id_list?source=completed&page_size=30&page_number=1");
         await fs.writeFile ("./result/completed-items.json", JSON.stringify(await res_.json(),undefined,2), function(err) {
             if (err) throw err;
                 console.log('complete');
@@ -93,11 +94,11 @@ export class Calls {
         console.log("\x1b[32m%s\x1b[0m","\tTOTAL TO SHIP: " + await allOrders.orders.filter(x => x.order_id).length);
     }
 
-    public async calcProfit(): Promise<any> {
+    public async calcProfit(fileToCalc: any): Promise<any> {
         let products = await base.loadJSONData("/stocks/products.json");
         let data = [];
 
-        await base.loopJsonData ("/result/to-ship-total.json", "orders", async function(obj) {
+        await base.loopJsonDatafromJSON(fileToCalc, "orders", async function(obj) {
             let dateNow = base.getDateFromEpoch(obj.order_date);
 
 
@@ -146,12 +147,12 @@ export class Calls {
 
         const processed = await base.processOrderBody(data);
         let to_ship = JSON.stringify(processed,undefined,2);
-        await fs.writeFile ("./result/to-ship-total.json", to_ship, async function(err) {
+        await fs.writeFile (fileToCalc, to_ship, async function(err) {
             if (err) throw err;
                 console.log('complete');
             }
         );
-}
+    }
 
     public async getShippingStat({ request, baseURL }): Promise<any> {
         let count = 1;
@@ -173,44 +174,20 @@ export class Calls {
                 combinedResponses = (await combinedResponses + await orders).replace("\n][",",");
             }
             ++count;
-            //console.log(combinedResponses);
+            // console.log(combinedResponses);
         } while (count <= pages);
 
         let combinedRes;
         const order_ids = await base.processOrderBody(JSON.parse(combinedResponses));
         const total_order_ids = Object.keys(await order_ids.orders).length;
+        // console.log(order_ids)
 
-        // JSON file to be checked
-        const info = await base.loadContent("/result/shipping-status.json");
-
-        for (let x = 0; x < total_order_ids; x++) {
-            const current_val = Number(Object.values(await order_ids.orders[x]));
-            const transDetail = await request.get(baseURL + "/api/v3/finance/income_transaction_history_detail/?order_id=" + String(current_val));
-            let info = await JSON.parse(JSON.stringify(await transDetail.json()));
-            //console.log(typeof info.data.payment_info.fees_and_charges.transaction_fee);
-
-            const getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + String(current_val));
-            let stat = await JSON.parse(JSON.stringify(await getShippingStatus.json()));
-
-            const epoch = stat.data.list[0].ctime;
-            const dateNow = base.getDateFromEpoch(epoch);
-            // console.log(stat.data);
-            stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "order_sn": x.order_sn,
-                                "third_party_tn" : x.thirdparty_tracking_number,
-                                "order_date": dateNow,
-                                "status": x.status, "status2" : x.channel_status,
-                                "subtotal" : info.data.payment_info.merchant_subtotal.product_price,
-                                "shipping_fee": info.data.buyer_payment_info.shipping_fee,
-                                "charges": Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee),
-                                "refund" : info.data.payment_info.merchant_subtotal.refund_amount,
-                                "net" : info.data.payment_info.merchant_subtotal.product_price - 
-                                        (Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee))}));
-
-            stat = await JSON.stringify(await stat[0], undefined,2);
-            combinedRes = (await combinedRes + await stat).replace("\n}{","\n},\n{");
-        }
-
-        await base.saveFile("./result/shipping-status.json", await combinedRes.replace("undefined","{ \"orders\" : [") + "\n]\n}");
+        await reuse.getShippingDetails({request, baseURL}, await order_ids, "./result/shipping-status.json");
+    }
+    
+    public async getShippingDetailsFromToShip({ request, baseURL }): Promise<any> {
+        const data = await base.loadContent("/result/to-ship-total.json", true);
+        await reuse.getShippingDetails({request, baseURL}, await data, "./result/toShipActualIncomeDetails.json");
     }
 
     public async saveMissingOrdersInDB({ request, baseURL }): Promise<any> {
@@ -237,6 +214,10 @@ export class Calls {
             const missingDetails = JSON.parse(missing_details)
             const order_ids = missingDetails.map(x => x.order_id);
             const combined = Object.assign(current_details, {missingDetails});
+            
+            for (let item of missingDetails) {
+                console.log(item.order_id);
+            }
 
             let to_ship = JSON.stringify(await combined,undefined,2).replace(/\s\],\s*\"missingDetails\": \[\s/, ",\n").replace("\n ,", ",");
             await base.saveFile("./db/orders.json", to_ship.replace(/,\s*\"missingDetails\": \[\]\s/, "\n"));
@@ -310,7 +291,7 @@ export class Calls {
         let toAdd = [];
         let count = 0;
         do {
-            const res = await request.get(baseURL + "/api/v3/finance/get_wallet_transactions/?wallet_type=0&transaction_types=101,102&page_size=30&page_number="+page);
+            const res = await request.get(baseURL + "/api/v3/finance/get_wallet_transactions/?wallet_type=0&transaction_types=101,102&page_size=100&page_number="+page);
             let response = await JSON.parse(JSON.stringify(await res.json()));
             const size = response.data.list.length;
 

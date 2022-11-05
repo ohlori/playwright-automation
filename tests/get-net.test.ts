@@ -28,7 +28,7 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     const info = await base.loadJSONData("/db/orders.json");
     
     /*                UPDATE THE DATE AND MONTH!!       */
-    let month = 10;
+    let month = 11;
     let day = 1; //First entry is 02/18/2022
    /****************************************************/
     console.log("-------------------------------------------");
@@ -38,7 +38,7 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     let subtotal = 0;
     let gross = 0;
     do {
-        const mon = month > 10 ? ""+month : "0"+month;4
+        const mon = month > 10 ? ""+month : "0"+month;
         subtotal = subtotal + Number(await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.profit.total).reduce((acc, x) => x+acc, 0));
         const currentGross = Number(await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.net).reduce((acc, x) => x+acc, 0));
         gross = gross + currentGross;
@@ -50,7 +50,7 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
         ++day;
     } while (total != 0)
     console.log("-------------------------------------------");
-    console.log("             TOTAL  : "+ base.pesoFormat(subtotal) +"            ");
+    console.log("             TOTAL  : "+ base.pesoFormat(subtotal) + " | " + ((subtotal/gross)*100).toFixed(0) + "%");
     console.log("             AVERAGE: "+ base.pesoFormat(subtotal/ (day-2)) +"            ");
     console.log("-------------------------------------------");
     console.log("       MONTHLY GROSS : "+ base.pesoFormat(gross) +"            ");
@@ -59,7 +59,7 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
 test.skip("Test", async () => {
     let data = [];
 
-    await base.loopJsonData ("/db/orders3.json", "orders", async function(obj) {
+    await base.loopJsonDatafromJSON ("/db/orders3.json", "orders", async function(obj) {
         const net_new = obj.total - obj.e_charges;
         
         data.push(await Object.assign(obj, {

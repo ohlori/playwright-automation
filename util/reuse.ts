@@ -54,4 +54,34 @@ export class Reuse {
 
         return combinedResponses;
     }
+
+    public async getShippingDetails({ request, baseURL }, orders: any, fileName: any): Promise<any> {
+        let combinedRes;
+        const to_ship_total_count = await orders.orders.length;
+        for (let x = 0; x < to_ship_total_count; x++) {
+            const transDetail = await request.get(baseURL + "/api/v3/finance/income_transaction_history_detail/?order_id=" + orders.orders[x].order_id);
+            let info = await JSON.parse(JSON.stringify(await transDetail.json()));
+            //console.log(typeof info.data.payment_info.fees_and_charges.transaction_fee);
+
+            const getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + orders.orders[x].order_id);
+            let stat = await JSON.parse(JSON.stringify(await getShippingStatus.json()));
+            const epoch = stat.data.list[0].ctime;
+            const dateNow = base.getDateFromEpoch(epoch);
+            // console.log(stat.data);
+            stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "order_sn": x.order_sn,
+                                "third_party_tn" : x.thirdparty_tracking_number,
+                                "order_date": dateNow,
+                                "status": x.status, "status2" : x.channel_status,
+                                "subtotal" : info.data.payment_info.merchant_subtotal.product_price,
+                                "shipping_fee": info.data.buyer_payment_info.shipping_fee,
+                                "charges": Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee),
+                                "refund" : info.data.payment_info.merchant_subtotal.refund_amount,
+                                "net" : info.data.payment_info.merchant_subtotal.product_price - 
+                                        (Number(info.data.payment_info.fees_and_charges.transaction_fee) + Number(info.data.payment_info.fees_and_charges.commission_fee))}));
+
+            stat = await JSON.stringify(await stat[0], undefined,2);
+            combinedRes = (await combinedRes + await stat).replace("\n}{","\n},\n{");
+        }
+        await base.saveFile(fileName, await combinedRes.replace("undefined","{ \"orders\" : [") + "\n]\n}");
+    }
 }

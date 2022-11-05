@@ -19,6 +19,7 @@ test("Get SHIPPING status", async ({ request, baseURL }) => {
 test("Check if all items are saved in DB", async ({ request, baseURL }) => {
     test.setTimeout(12000000);
     await call.saveMissingOrdersInDB({ request, baseURL });
+    await call.calcProfit("./db/orders.json");
 })
 
 test("Shipping Status Summary", async ({ request, baseURL }) => {
@@ -53,6 +54,10 @@ test("Shipping Status Summary", async ({ request, baseURL }) => {
     // TO SHIP SUMMARY
     const toship = await base.loadContent("/result/to-ship-total.json", true);
     
+    // TO SHIP (with Shopee's actual calculation)
+    // await call.getShippingDetailsFromToShip({ request, baseURL });
+    // const toship = await base.loadContent("/result/toShipActualIncomeDetails.json", true);
+
     const sales = Number(await await toship.orders.map(x => x.net).reduce((acc, x) => x+acc, 0));
     console.log("\x1b[33m%s\x1b[0m","\tDaily Sales Net       : " + await base.pesoFormat(await sales));
     total = Number(await total + await sales);
