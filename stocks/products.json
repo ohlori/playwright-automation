@@ -44,7 +44,6 @@
         }
     },
     "6291020872" : {
-        "name" : "Generic Colored",
         "142181247155" : {
             "name" : "Generic Colored Paper",
             "cost" : 36.90
@@ -52,7 +51,25 @@
         "142181247156" : {
             "name" : "Generic Colored Sticker",
             "cost" : 45.20
-        }     
+        },
+        "213365409014" : {
+            "name" : "mint,orange&purple,Paper / NOT STICKER",
+            "cost" : 22.18
+        },
+        "213365409012" : {
+            "name" : "pink,yellow&blue,Paper / NOT STICKER",
+            "cost" : 36.90
+        },
+        "213365409013" : {
+            "name" : "pink,yellow&blue,Sticker",
+            "cost" : 36.90
+        }
+    },
+    "16790576131" : {
+        "203365406774" : {
+            "name" : "mint,orange&purple,Paper / NOT STICKER",
+            "cost" : 22.18
+        }
     },
     "6950756099" : {
         "name" : "Paperang Themal Rolls",
@@ -689,6 +706,36 @@
         "155050298275" : {
             "name" : "Fairy Ligts - Diamond Lights",
             "cost" : 100
+        }
+    },
+    "20460473595" : {
+        "156194828506" : {
+            "name" : "Hydrofella Brush",
+            "cost" : 100
+        }
+    },
+    "21860472365" : {
+        "213086504857" : {
+            "name" : "Hydrofella Bottle - Grey",
+            "cost" : 150
+        }
+    },
+    "18460474274" : {
+        "213086451342" : {
+            "name" : "Hydrofella Bottle - Pink",
+            "cost" : 150
+        }
+    },
+    "21960471179" : {
+        "213086393143" : {
+            "name" : "Hydrofella Bottle - White",
+            "cost" : 150
+        }
+    },
+    "22712270535" :{
+        "88544356019" : {
+            "name" : "Mini Container",
+            "cost" : 2.31
         }
     }
 }

@@ -33,4 +33,3 @@ test("DAILY NET REPORT", async () => {
 test.skip("SAMPLE SKIP", async ({ request, baseURL }) => {
     await call.getShippingDetailsFromToShip({ request, baseURL });
 })
-

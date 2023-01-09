@@ -100,8 +100,6 @@ export class Calls {
 
         await base.loopJsonDatafromJSON(fileToCalc, "orders", async function(obj) {
             let dateNow = base.getDateFromEpoch(obj.order_date);
-
-
             let total=0, resArray={};
             const item = obj.order_items;
             if ((!Object.prototype.hasOwnProperty.call(obj, "profit"))){
@@ -134,7 +132,7 @@ export class Calls {
                 }
 
                 data.push(await Object.assign(obj, {
-                    order_date : 0+dateNow,
+                    order_date : dateNow,
                     profit: {
                         total: Number(total.toFixed(2)),
                         ...resArray
@@ -366,7 +364,7 @@ export class Calls {
                         // Find in the refund lists if there was a refund/return trasaction
                         let refund_detail = await refund.orders.filter(z => z.order_id === expectedOrderCharges.orders[x].order_id);
                         let new_e = expectedOrderCharges.orders[x].total - Number(refund_detail[0].refund_amount);
-                        const new_charges = Math.round(new_e * 0.0224) + Math.round(new_e * 0.02);
+                        const new_charges = Math.round(new_e * global.comFee) + Math.round(new_e * global.transFee);
                         new_e = await new_e - new_charges;
                         const discrep = new_e - Number(result[0].amount);
                         totalDiscrp = totalDiscrp +discrep;
@@ -448,5 +446,13 @@ export class Calls {
                 console.log('complete');
             }
         );
+    }
+
+    public async updateOrderDateInDBOrders({ request, baseURL }, keyToUpdate:string, incorrecVal:string): Promise<any> {
+        const dealIds = await reuse.getDealIdsWithIncorrectVal({ request, baseURL }, keyToUpdate, incorrecVal);
+        for (let orderId of dealIds) {
+            const  orderDate = await reuse.getOrderDate({ request, baseURL }, orderId);
+            await reuse.updateDBOrderDetails(orderId, keyToUpdate, orderDate)
+        }
     }
 }

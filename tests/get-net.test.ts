@@ -28,8 +28,9 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     const info = await base.loadJSONData("/db/orders.json");
     
     /*                UPDATE THE DATE AND MONTH!!       */
-    let month = 11;
+    let month = 1;
     let day = 1; //First entry is 02/18/2022
+    const year =2023;
    /****************************************************/
     console.log("-------------------------------------------");
     console.log("             MONTHLY NET PROFIT            ");
@@ -38,11 +39,10 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     let subtotal = 0;
     let gross = 0;
     do {
-        const mon = month > 10 ? ""+month : "0"+month;
-        subtotal = subtotal + Number(await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.profit.total).reduce((acc, x) => x+acc, 0));
-        const currentGross = Number(await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.net).reduce((acc, x) => x+acc, 0));
+        subtotal = subtotal + Number(await info.orders.filter(x => x.order_date.toString().includes(month+"/"+day+"/"+year)).map(x => x.profit.total).reduce((acc, x) => x+acc, 0));
+        const currentGross = Number(await info.orders.filter(x => x.order_date.toString().includes(month+"/"+day+"/"+year)).map(x => x.net).reduce((acc, x) => x+acc, 0));
         gross = gross + currentGross;
-        total = await info.orders.filter(x => x.order_date.toString().includes(mon+"/"+day+"/")).map(x => x.profit.total).reduce((acc, x) => x+acc, 0);
+        total = await info.orders.filter(x => x.order_date.toString().includes(month+"/"+day+"/"+year)).map(x => x.profit.total).reduce((acc, x) => x+acc, 0);
         if (await total != 0) {
             // console.log(month +"/" + day +": " +  base.pesoFormat(total) + " | " + base.pesoFormat(currentGross) + " | " + ((total/currentGross)*100).toFixed(0) + "%");
             console.log(month +"/" + String(day).padStart(2,"0") +": " +  base.pesoFormat(total) + " | " + ((total/currentGross)*100).toFixed(0) + "%");

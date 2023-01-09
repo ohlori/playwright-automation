@@ -7,6 +7,7 @@
     "test" : "npx playwright test tests/practice.test.ts",
     "net" : "npx playwright test tests/get-net.test.ts",
     "completed" : "npx playwright test tests/completed.test.ts",
+    "update" : "npx playwright test tests/update-db.test.ts",
     "d2d" : "npx playwright test tests/get-data.test.ts && npx playwright test tests/get-shipping-status.test.ts"
   },
   "devDependencies": {
