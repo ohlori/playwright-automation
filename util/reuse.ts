@@ -93,6 +93,7 @@ export class Reuse {
                 getShippingStatus = await request.get(baseURL + "/api/v3/order/get_forder_logistics?order_id=" + orders.orders[x].order_id);
                 retry += 1;
                 // console.log (orders.orders[x].order_id + " - " + transDetail.status() + " - " + getShippingStatus.status())
+                await delay(2000);
             }while((transDetail.status()==502 || getShippingStatus.status()==502))
 
             let info = await JSON.parse(JSON.stringify(await transDetail.json()));
@@ -100,6 +101,9 @@ export class Reuse {
             const epoch = await stat.data.list[0].ctime;
             const dateNow = await base.getDateFromEpoch(epoch);
 
+            // console.log("-----------------------------------------------------------------------------------------------")
+            // console.log(JSON.stringify(await getShippingStatus.json()))
+            // console.log(JSON.stringify(await transDetail.json()))
             stat = await stat.data.list.map((x) => ({"order_id": x.order_id, "order_sn": x.order_sn,
                                 "third_party_tn" : x.thirdparty_tracking_number,
                                 "order_date": dateNow,
@@ -116,3 +120,5 @@ export class Reuse {
         await base.saveFile(fileName, await combinedRes.replace("undefined","{ \"orders\" : [") + "\n]\n}");
     }
 }
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))

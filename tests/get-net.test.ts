@@ -4,7 +4,6 @@ import { Calls } from '../util/calls';
 var fs = require("fs/promises");
 
 const base = new Base();
-const call = new Calls();
 
 test("NET PROFIT REPORT BY MONTH", async () => {
     const info = await base.loadJSONData("/db/orders.json");
@@ -30,7 +29,7 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
     /*                UPDATE THE DATE AND MONTH!!       */
     let month = 1;
     let day = 1; //First entry is 02/18/2022
-    const year =2023;
+    const year =2024;
    /****************************************************/
     console.log("-------------------------------------------");
     console.log("             MONTHLY NET PROFIT            ");
@@ -43,6 +42,7 @@ test.only("DAILY NET PROFIT REPORT BY MONTH", async () => {
         const currentGross = Number(await info.orders.filter(x => x.order_date.toString().includes(month+"/"+day+"/"+year)).map(x => x.net).reduce((acc, x) => x+acc, 0));
         gross = gross + currentGross;
         total = await info.orders.filter(x => x.order_date.toString().includes(month+"/"+day+"/"+year)).map(x => x.profit.total).reduce((acc, x) => x+acc, 0);
+        // console.log(total);
         if (await total != 0) {
             // console.log(month +"/" + day +": " +  base.pesoFormat(total) + " | " + base.pesoFormat(currentGross) + " | " + ((total/currentGross)*100).toFixed(0) + "%");
             console.log(month +"/" + String(day).padStart(2,"0") +": " +  base.pesoFormat(total) + " | " + ((total/currentGross)*100).toFixed(0) + "%");

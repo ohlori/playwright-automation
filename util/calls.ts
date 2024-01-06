@@ -73,7 +73,7 @@ export class Calls {
                 
                 ++count;
                 // console.log(pages);
-            } while (await count <= pages);
+            } while (await count <= pages+1);
 
             if (combinedResponses!==undefined){
                 //Remove the shipped items (by removing orders that are not anymore listed on the To Ship tab)
@@ -172,9 +172,10 @@ export class Calls {
                 combinedResponses = (await combinedResponses + await orders).replace("\n][",",");
             }
             ++count;
-            // console.log(combinedResponses);
-        } while (count <= pages);
-
+            
+        } while (count <= pages+2);
+        combinedResponses = combinedResponses.replaceAll(",]\n[", ",").replace(",][]", "]");
+        // console.log(combinedResponses);
         let combinedRes;
         const order_ids = await base.processOrderBody(JSON.parse(combinedResponses));
         const total_order_ids = Object.keys(await order_ids.orders).length;
@@ -289,12 +290,11 @@ export class Calls {
         let toAdd = [];
         let count = 0;
         do {
-            const res = await request.get(baseURL + "/api/v3/finance/get_wallet_transactions/?wallet_type=0&transaction_types=101,102&page_size=100&page_number="+page);
+            const res = await request.get(baseURL + "/api/v3/finance/get_wallet_transactions/?wallet_type=0&transaction_types=101,102&page_size=100&page_number="+page, { timeout: 0 });
             let response = await JSON.parse(JSON.stringify(await res.json()));
             const size = response.data.list.length;
-
             for (let x = 0; x<size; x++) {
-                if(await completed.orders.filter(z => z.order_sn === response.data.list[x].order_sn).length === 0){
+                if(await completed.orders.filter(z => z.order_id === response.data.list[x].order_id).length === 0){
                     ++count;
                     const item = {"order_id": response.data.list[x].target_id, "order_sn" : response.data.list[x].order_sn, 
                                 "amount" : response.data.list[x].amount, "refund": 0, "transaction_id": response.data.list[x].transaction_id};
